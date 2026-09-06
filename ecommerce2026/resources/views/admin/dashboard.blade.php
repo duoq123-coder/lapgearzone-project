@@ -12,16 +12,24 @@
         .action-icon:hover {
             opacity: 0.7;
         }
+        .card-hero-sync {
+            border-radius: 2px !important;
+            overflow: hidden;
+        }
+        [data-bs-theme="dark"] .card-hero-sync {
+            background-color: #111113 !important;
+            border-color: #26262a !important;
+        }
     </style>
     <!-- Header Block -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1 text-dark display-font"><i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard Admin</h2>
+            <h2 class="fw-bold mb-1 text-dark display-font" style="letter-spacing: -0.5px; text-transform: uppercase;"><i class="bi bi-speedometer2 text-dark me-2"></i>Dashboard Admin</h2>
             <p class="text-secondary small mb-0">Quản lý nhập xuất hàng hóa, doanh thu và nguồn nhân lực tại LapGearZone.</p>
         </div>
     </div>
 
-    <!-- 4 Stats Cards (Cyber Luxury Glass) -->
+    <!-- 3 Stats Cards (Tactical Telemetry) -->
     @php
         $collection = collect($staffList ?? []);
         $workingCount = $collection->whereNotIn('status', ['Nghỉ', 'Không đi làm'])->count();
@@ -35,14 +43,14 @@
     <div class="row g-4 mb-4">
         <!-- Daily Revenue -->
         <div class="col-xl-4 col-md-12">
-            <div class="card bg-white border-0 rounded-4 shadow-sm h-100 overflow-hidden" style="border: 1px solid rgba(0, 0, 0, 0.08) !important;">
+            <div class="card stat-card-tactical h-100 overflow-hidden">
                 <div class="card-body p-4 d-flex align-items-center justify-content-between">
                     <div style="max-width: calc(100% - 70px);">
-                        <small class="text-secondary fw-semibold d-block mb-1 text-uppercase letter-spacing-1">Doanh thu trong ngày</small>
-                        <h3 class="fw-extrabold text-dark display-font mb-0" style="word-break: break-word; font-size: 1.6rem;">{{ number_format($dailyRevenue ?? 0, 0, ',', '.') }} đ</h3>
+                        <small class="text-secondary fw-bold d-block mb-1 text-uppercase font-monospace" style="font-size: 0.72rem; letter-spacing: 0.08em;">// Doanh thu trong ngày</small>
+                        <h3 class="fw-bold text-dark font-monospace mb-0" style="word-break: break-word; font-size: 1.65rem;">{{ number_format($dailyRevenue ?? 0, 0, ',', '.') }} <span style="font-size: 1rem; font-weight: 500;">đ</span></h3>
                     </div>
-                    <div class="bg-success bg-opacity-10 rounded-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 60px; height: 60px;">
-                        <i class="bi bi-currency-dollar text-success" style="font-size: 1.8rem;"></i>
+                    <div class="stat-icon-box flex-shrink-0">
+                        <i class="bi bi-currency-dollar text-dark fs-3"></i>
                     </div>
                 </div>
             </div>
@@ -50,14 +58,14 @@
 
         <!-- Weekly Revenue -->
         <div class="col-xl-4 col-md-12">
-            <div class="card bg-white border-0 rounded-4 shadow-sm h-100 overflow-hidden" style="border: 1px solid rgba(0, 0, 0, 0.08) !important;">
+            <div class="card stat-card-tactical h-100 overflow-hidden">
                 <div class="card-body p-4 d-flex align-items-center justify-content-between">
                     <div style="max-width: calc(100% - 70px);">
-                        <small class="text-secondary fw-semibold d-block mb-1 text-uppercase letter-spacing-1">Doanh thu trong tuần</small>
-                        <h3 class="fw-extrabold text-dark display-font mb-0" style="word-break: break-word; font-size: 1.6rem;">{{ number_format($weeklyRevenue ?? 0, 0, ',', '.') }} đ</h3>
+                        <small class="text-secondary fw-bold d-block mb-1 text-uppercase font-monospace" style="font-size: 0.72rem; letter-spacing: 0.08em;">// Doanh thu trong tuần</small>
+                        <h3 class="fw-bold text-dark font-monospace mb-0" style="word-break: break-word; font-size: 1.65rem;">{{ number_format($weeklyRevenue ?? 0, 0, ',', '.') }} <span style="font-size: 1rem; font-weight: 500;">đ</span></h3>
                     </div>
-                    <div class="bg-primary bg-opacity-10 rounded-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 60px; height: 60px;">
-                        <i class="bi bi-wallet2 text-primary" style="font-size: 1.6rem;"></i>
+                    <div class="stat-icon-box flex-shrink-0">
+                        <i class="bi bi-wallet2 text-dark fs-3"></i>
                     </div>
                 </div>
             </div>
@@ -65,17 +73,17 @@
 
         <!-- Inventory Stock -->
         <div class="col-xl-4 col-md-12">
-            <div class="card bg-white border-0 rounded-4 shadow-sm h-100 overflow-hidden" style="border: 1px solid rgba(0, 0, 0, 0.08) !important;">
+            <div class="card stat-card-tactical h-100 overflow-hidden">
                 <div class="card-body p-4 d-flex align-items-center justify-content-between">
                     <div style="max-width: calc(100% - 70px);">
-                        <small class="text-secondary fw-semibold d-block mb-1 text-uppercase letter-spacing-1">Sản phẩm hệ thống</small>
-                        <h3 class="fw-extrabold text-dark display-font mb-2" style="font-size: 1.6rem;">{{ $totalProducts ?? 0 }} dòng</h3>
-                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill fw-bold border border-warning border-opacity-25" style="font-size: 0.75rem;">
+                        <small class="text-secondary fw-bold d-block mb-1 text-uppercase font-monospace" style="font-size: 0.72rem; letter-spacing: 0.08em;">// Sản phẩm hệ thống</small>
+                        <h3 class="fw-bold text-dark font-monospace mb-2" style="font-size: 1.65rem;">{{ $totalProducts ?? 0 }} <span style="font-size: 0.95rem; font-family: 'Space Grotesk', sans-serif;">DÒNG</span></h3>
+                        <span class="badge badge-terracotta">
                             <i class="bi bi-boxes me-1"></i> {{ $totalCategories ?? 0 }} Danh mục
                         </span>
                     </div>
-                    <div class="bg-warning bg-opacity-10 rounded-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 60px; height: 60px;">
-                        <i class="bi bi-box text-warning" style="font-size: 1.6rem;"></i>
+                    <div class="stat-icon-box flex-shrink-0">
+                        <i class="bi bi-box text-dark fs-3"></i>
                     </div>
                 </div>
             </div>
@@ -88,7 +96,7 @@
         <div class="col-lg-12">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-activity text-primary me-2"></i>Biểu Đồ Doanh Thu Tổng Hợp</h5>
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-activity text-dark me-2"></i>Biểu Đồ Doanh Thu Tổng Hợp</h5>
                     <span class="text-muted small">7 ngày gần nhất</span>
                 </div>
                 <div class="card-body">
@@ -103,11 +111,11 @@
     <!-- Top Selling Products -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-white shadow-sm border-0 rounded-4 shadow-sm" style="border: 1px solid rgba(0, 0, 0, 0.08) !important;">
+            <div class="card bg-white shadow-sm border-0 card-hero-sync" style="border: 1px solid rgba(0, 0, 0, 0.08) !important;">
                 <div class="card-header bg-transparent border-bottom border-secondary border-opacity-10 p-4">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-star-fill text-warning me-2"></i>Thống Kê Sản Phẩm Bán Chạy Nhất Tháng</h5>
-                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold">Top {{ count($topSellingProducts) }} sản phẩm</span>
+                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-star-fill text-dark me-2"></i>Thống Kê Sản Phẩm Bán Chạy Nhất Tháng</h5>
+                        <span class="badge bg-dark text-white rounded-0 px-3 py-2 fw-bold">Top {{ count($topSellingProducts) }} sản phẩm</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -140,7 +148,7 @@
                                             <span class="badge bg-light text-dark border">{{ $product->category->name ?? 'Không xác định' }}</span>
                                         </td>
                                         <td class="text-end pe-4">
-                                            <span class="badge {{ $product->total_sold > 5 ? 'bg-success' : 'bg-primary' }} rounded-pill px-3 py-2 fw-bold fs-6">
+                                            <span class="badge bg-dark rounded-0 px-3 py-2 fw-bold fs-6">
                                                 {{ $product->total_sold }} <small class="fw-normal">đã bán</small>
                                             </span>
                                         </td>
@@ -164,16 +172,14 @@
     <!-- Order Management Panel -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-white shadow-sm border-0 rounded-4 shadow-sm" style="border: 1px solid rgba(0, 0, 0, 0.08) !important;">
-                <div class="card-header bg-transparent border-bottom border-secondary border-opacity-10 p-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-cart-check text-success me-2"></i>Quản Lý Đơn Hàng Chờ Xử Lý</h5>
-                        <span class="badge bg-danger rounded-pill px-3 py-2 fw-bold">{{ isset($pendingOrders) ? $pendingOrders->count() : 0 }} đơn mới</span>
-                    </div>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-cart-check text-dark me-2"></i>Quản Lý Đơn Hàng Chờ Xử Lý</h5>
+                    <span class="badge bg-dark text-white px-3 py-1.5 font-monospace">{{ isset($pendingOrders) ? $pendingOrders->count() : 0 }} ĐƠN MỚI</span>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table align-middle mb-0 table-light table-hover">
+                        <table class="table align-middle mb-0 table-hover">
                             <thead>
                                 <tr>
                                     <th class="ps-4">Mã Đơn</th>
@@ -184,61 +190,88 @@
                                     <th>Thanh toán</th>
                                     <th>Ngày tạo</th>
                                     <th class="text-center">Trạng thái</th>
-                                    <th class="text-center pe-4">Xác nhận</th>
+                                    <th class="text-center pe-4 text-nowrap" style="width: 1%; min-width: 220px;">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($pendingOrders ?? [] as $order)
                                     <tr>
-                                        <td class="fw-bold text-info ps-4">#ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</td>
+                                        <td class="fw-bold text-dark ps-4 font-monospace">#ORD-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</td>
                                         <td class="fw-bold text-dark">{{ $order->name }}</td>
-                                        <td><a href="tel:{{ $order->phone }}" class="text-decoration-none text-info">{{ $order->phone }}</a></td>
+                                        <td><a href="tel:{{ $order->phone }}" class="text-decoration-none text-dark font-monospace">{{ $order->phone }}</a></td>
                                         <td><small class="text-secondary">{{ $order->address }}</small></td>
-                                        <td class="text-end text-success fw-bold">{{ number_format($order->total_price, 0, ',', '.') }} đ</td>
+                                        <td class="text-end text-dark fw-bold font-monospace">{{ number_format($order->total_price, 0, ',', '.') }} đ</td>
                                         <td>
-                                            @if($order->payment_method == 'vnpay')
-                                                <span class="badge bg-primary">VNPay</span>
+                                            @if($order->payment_method == 'payos')
+                                                <span class="badge bg-dark text-white">PayOS</span>
                                             @elseif($order->payment_method == 'cod_install')
-                                                <span class="badge bg-success">Tại nhà & Lắp đặt</span>
+                                                <span class="badge bg-secondary text-white">COD</span>
+                                            @elseif($order->payment_method == 'vnpay')
+                                                <span class="badge border text-dark">VNPay</span>
                                             @else
-                                                <span class="badge bg-secondary">Khác</span>
+                                                <span class="badge bg-light text-dark border">{{ $order->payment_method }}</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <small class="text-secondary">{{ $order->created_at->format('d/m/Y H:i') }}</small>
+                                            <small class="text-secondary font-monospace">{{ $order->created_at->format('d/m/Y H:i') }}</small>
                                             @if($order->delivery_status === 'assigned')
-                                                <span class="badge bg-warning text-dark d-block mt-1">Đã giao NV</span>
+                                                <span class="badge border text-dark d-block mt-1">Đã giao NV</span>
+                                            @elseif($order->delivery_status === 'customer_confirmed')
+                                                <span class="badge bg-info text-dark d-block mt-1">Khách Đã Nhận</span>
                                             @elseif($order->delivery_status === 'completed')
-                                                <span class="badge bg-success d-block mt-1">NV Đã xong</span>
+                                                <span class="badge bg-dark text-white d-block mt-1">NV Đã xong</span>
                                             @endif
                                         </td>
                                         
                                         <td class="text-center">
-                                            <span class="badge bg-danger rounded-pill px-3 py-1.5" style="font-size: 0.75rem;">
-                                                <i class="bi bi-exclamation-circle me-1"></i>Đang xử lý
-                                            </span>
+                                            @if($order->status === 'paid')
+                                                <span class="badge bg-success text-white">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>Đã thanh toán
+                                                </span>
+                                            @elseif($order->status === 'processing')
+                                                <span class="badge bg-primary text-white">
+                                                    <i class="bi bi-gear-wide-connected me-1"></i>Đang xử lý
+                                                </span>
+                                            @elseif($order->status === 'cancelled')
+                                                <span class="badge bg-danger text-white">
+                                                    <i class="bi bi-x-circle-fill me-1"></i>Đã hủy
+                                                </span>
+                                            @elseif($order->status === 'completed')
+                                                <span class="badge bg-dark text-white">
+                                                    <i class="bi bi-check2-all me-1"></i>Hoàn thành
+                                                </span>
+                                            @else
+                                                <span class="badge border text-dark">
+                                                    <i class="bi bi-clock me-1"></i>Chờ thanh toán
+                                                </span>
+                                            @endif
+                                            @if($order->payment_method === 'cod_install')
+                                                @if($order->cash_remitted)
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle d-block mt-1" style="font-size: 0.7rem;">
+                                                        <i class="bi bi-cash-coin me-1"></i>Đã nộp tiền
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle d-block mt-1" style="font-size: 0.7rem;">
+                                                        <i class="bi bi-hourglass-split me-1"></i>Chưa nộp tiền
+                                                    </span>
+                                                @endif
+                                            @endif
                                         </td>
-                                        <td class="text-center pe-4">
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEditOrder_{{ $order->id }}">
+                                        <td class="text-center pe-4 text-nowrap align-middle" style="width: 1%;">
+                                            <div class="d-inline-flex align-items-center justify-content-center gap-1.5 flex-nowrap">
+                                                @if(!in_array($order->status, ['paid', 'completed']))
+                                                <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalEditOrder_{{ $order->id }}">
                                                     <i class="bi bi-pencil-fill me-1"></i>Sửa
                                                 </button>
-                                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalAssignDelivery_{{ $order->id }}">
-                                                    <i class="bi bi-truck me-1"></i>Giao nhiệm vụ
+                                                @endif
+                                                <button type="button" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalAssignDelivery_{{ $order->id }}">
+                                                    <i class="bi bi-truck me-1"></i>Giao NV
                                                 </button>
-
-                                                <form action="{{ route('admin.orders.receivePayment', $order->id) }}" method="POST" onsubmit="return confirm('Xác nhận đã thanh toán và chuyển thành phiếu xuất kho (Hoàn thành)?');">
+                                                <form action="{{ route('admin.orders.cancel', $order->id) }}" method="POST" class="m-0 d-inline-flex align-items-center" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không? Khách hàng có thể sẽ không hài lòng.');">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm">
-                                                        <i class="bi bi-check-circle-fill me-1"></i>Xác nhận
-                                                    </button>
-                                                </form>
-                                                <form action="{{ route('admin.orders.cancel', $order->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không? Khách hàng có thể sẽ không hài lòng.');">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold shadow-sm">
-                                                        <i class="bi bi-x-circle-fill me-1"></i>Hủy đơn
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
+                                                        <i class="bi bi-x-circle-fill me-1"></i>Hủy
                                                     </button>
                                                 </form>
                                             </div>
@@ -246,7 +279,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center py-5 text-secondary">
+                                        <td colspan="9" class="text-center py-5 text-secondary">
                                             <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
                                             Hiện không có đơn hàng nào chờ xử lý.
                                         </td>
@@ -255,40 +288,36 @@
                             </tbody>
                         </table>
                     </div>
-</div>
+                </div>
             </div>
         </div>
     </div>
-
-
-
-
 
     <!-- Import / Export Warehousing Panel -->
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header bg-transparent border-bottom border-secondary border-opacity-10 p-4">
+                <div class="card-header bg-transparent border-bottom p-4">
                     <div class="d-md-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold mb-3 mb-md-0 text-dark"><i class="bi bi-arrow-left-right text-primary me-2"></i>Quản Lý Luồng Kho Hàng</h5>
+                        <h5 class="fw-bold mb-3 mb-md-0 text-dark"><i class="bi bi-arrow-left-right text-dark me-2"></i>Quản Lý Luồng Kho Hàng</h5>
                         
                         <div class="d-flex align-items-center">
                             <!-- Tabs Navigation -->
                             <ul class="nav nav-pills me-3" id="warehouseTab" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active rounded-pill fw-bold" id="import-tab" data-bs-toggle="tab" data-bs-target="#import-pane" type="button" role="tab" aria-controls="import-pane" aria-selected="true">
+                                    <button class="nav-link active fw-bold" id="import-tab" data-bs-toggle="tab" data-bs-target="#import-pane" type="button" role="tab" aria-controls="import-pane" aria-selected="true">
                                         <i class="bi bi-box-arrow-in-down me-1"></i> Nhập sản phẩm vào
                                     </button>
                                 </li>
                                 <li class="nav-item ms-2" role="presentation">
-                                    <button class="nav-link rounded-pill fw-bold" id="export-tab" data-bs-toggle="tab" data-bs-target="#export-pane" type="button" role="tab" aria-controls="export-pane" aria-selected="false">
+                                    <button class="nav-link fw-bold" id="export-tab" data-bs-toggle="tab" data-bs-target="#export-pane" type="button" role="tab" aria-controls="export-pane" aria-selected="false">
                                         <i class="bi bi-box-arrow-up me-1"></i> Xuất sản phẩm đi
                                     </button>
                                 </li>
                             </ul>
 
                             <!-- Add Record Button -->
-                            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" id="btnAddRecord" data-bs-toggle="modal" data-bs-target="#modalImport">
+                            <button type="button" class="btn btn-dark btn-sm px-3" id="btnAddRecord" data-bs-toggle="modal" data-bs-target="#modalImport">
                                 <i class="bi bi-plus-circle-fill me-1"></i> Tạo phiếu nhập
                             </button>
                         </div>
@@ -306,11 +335,10 @@
                                             <th>Tên thiết bị</th>
                                             <th>Nhà cung cấp</th>
                                             <th>Số lượng</th>
-                                            <th class="text-end">Đơn giá nhập</th>
                                             <th class="text-end">Tổng tiền nhập</th>
                                             <th>Ngày lập</th>
                                             <th class="text-center">Trạng thái</th>
-                                            <th class="text-center">Hành động</th>
+                                            <th class="text-center text-nowrap" style="width: 1%; min-width: 290px;">Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -327,34 +355,36 @@
                                                 $createdAt = $firstImport->created_at->format('d/m/Y H:i');
                                             @endphp
                                             <tr>
-                                                <td class="fw-bold text-info">{{ $code }}</td>
+                                                <td class="fw-bold text-dark">{{ $code }}</td>
                                                 <td class="fw-bold text-dark">{{ $group->count() }} mặt hàng</td>
                                                 <td>{{ $supplier }}</td>
                                                 <td class="text-center fw-bold">{{ $totalQuantity }}</td>
-                                                <td class="text-end text-muted">-</td>
                                                 <td class="text-end text-success fw-bold">{{ number_format($totalPrice, 0, ',', '.') }} đ</td>
                                                 <td class="text-secondary small">{{ $createdAt }}</td>
                                                 <td class="text-center">
-                                                    <span class="badge {{ $status == 'Đã hoàn thành' ? 'bg-success' : 'bg-warning text-dark' }} rounded-pill px-3 py-1.5" style="font-size: 0.75rem;">
+                                                    <span class="badge {{ $status == 'Đã hoàn thành' ? 'bg-success' : 'bg-light text-dark border text-dark' }} rounded-pill px-3 py-1.5" style="font-size: 0.75rem;">
                                                         {{ $status }}
                                                     </span>
                                                 </td>
-                                                <td class="text-center">
-                                                    <div class="btn-group btn-group-sm">
+                                                <td class="text-center text-nowrap align-middle" style="width: 1%;">
+                                                    <div class="d-inline-flex align-items-center justify-content-center gap-1.5 flex-nowrap">
+                                                        <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalImportDetail_{{ $code }}" title="Xem chi tiết">
+                                                            <i class="bi bi-eye-fill me-1"></i> Chi tiết
+                                                        </button>
                                                         @if($status !== 'Đã hoàn thành')
-                                                            <button type="button" class="btn btn-outline-success rounded-start-pill px-3" data-bs-toggle="modal" data-bs-target="#modalConfirm_{{ $code }}">
-                                                                <i class="bi bi-check-circle-fill"></i> Xác nhận
+                                                            <button type="button" class="btn btn-dark btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalConfirm_{{ $code }}">
+                                                                <i class="bi bi-check-circle-fill me-1"></i> Xác nhận
                                                             </button>
                                                         @else
-                                                            <button type="button" class="btn btn-outline-secondary rounded-start-pill px-3" disabled>
-                                                                <i class="bi bi-check-circle-fill"></i> Đã Xác nhận
+                                                            <button type="button" class="btn btn-light btn-sm border rounded-pill px-3 fw-bold text-muted" disabled title="Phiếu nhập kho này đã được xác nhận">
+                                                                <i class="bi bi-check-circle-fill text-success me-1"></i> Đã xác nhận
                                                             </button>
                                                         @endif
-                                                        <form action="{{ route('admin.imports.destroy', $firstImport->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa phiếu nhập kho này? Lưu ý: Hành động này sẽ xóa phiếu nhập (Demo).');">
+                                                        <form action="{{ route('admin.imports.destroy', $firstImport->id) }}" method="POST" class="m-0 d-inline-flex align-items-center" onsubmit="return confirm('Bạn có chắc chắn muốn xóa phiếu nhập kho này? Lưu ý: Hành động này sẽ xóa phiếu nhập (Demo).');">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="btn btn-outline-danger {{ $status == 'Đã hoàn thành' ? 'rounded-pill' : 'rounded-end-pill' }} px-3">
-                                                                <i class="bi bi-trash-fill"></i> Xóa
+                                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">
+                                                                <i class="bi bi-trash-fill me-1"></i> Xóa
                                                             </button>
                                                         </form>
                                                     </div>
@@ -362,7 +392,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="9" class="text-center text-secondary py-4">Chưa có lịch sử nhập kho.</td>
+                                                <td colspan="8" class="text-center text-secondary py-4">Chưa có lịch sử nhập kho.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -380,27 +410,53 @@
                                             <th>Mã xuất kho</th>
                                             <th>Tên thiết bị</th>
                                             <th>Khách hàng</th>
-                                            <th>Đơn vị vận chuyển</th>
+                                            <th>Nhân viên giao hàng</th>
                                             <th class="text-center">Số lượng</th>
                                             <th class="text-end">Đơn giá bán</th>
                                             <th>Ngày xuất</th>
                                             <th class="text-center">Trạng thái</th>
-                                            <th class="text-center">Hành động</th>
+                                            <th class="text-center text-nowrap" style="width: 1%; min-width: 320px;">Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($exportsHistory ?? [] as $export)
                                             <tr>
-                                                <td class="fw-bold text-warning">{{ $export->code }}</td>
+                                                <td class="fw-bold text-dark">{{ $export->code }}</td>
                                                 <td class="fw-bold text-dark">{{ $export->product?->name ?? 'Sản phẩm đã bị xóa' }}</td>
                                                 <td>{{ $export->customer_name }}</td>
-                                                <td><i class="bi bi-truck me-1"></i>{{ $export->shipping }}</td>
+                                                <td>
+                                                    @php
+                                                        $shippingVal = trim($export->shipping ?? '');
+                                                        $staffName = $shippingVal;
+                                                        $staffPhone = null;
+                                                        if (preg_match('/^(.*?)\s*\((.*?)\)$/', $shippingVal, $matches)) {
+                                                            $staffName = trim($matches[1]);
+                                                            $staffPhone = trim($matches[2]);
+                                                        }
+                                                    @endphp
+                                                    @if($shippingVal === 'Chưa phân bổ' || empty($shippingVal))
+                                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 fw-medium">
+                                                            <i class="bi bi-person-dash me-1"></i>Chưa phân bổ
+                                                        </span>
+                                                    @else
+                                                        <div class="d-flex flex-column">
+                                                            <span class="fw-bold text-dark">
+                                                                <i class="bi bi-person-badge text-primary me-1"></i>{{ $staffName }}
+                                                            </span>
+                                                            @if($staffPhone)
+                                                                <small class="text-secondary" style="font-size: 0.78rem;">
+                                                                    <i class="bi bi-telephone-fill text-muted me-1"></i>{{ $staffPhone }}
+                                                                </small>
+                                                            @endif
+                                                        </div>
+                                                    @endif
+                                                </td>
                                                 <td class="text-center fw-bold">{{ $export->quantity }}</td>
                                                 <td class="text-end text-success fw-bold">{{ number_format($export->total, 0, ',', '.') }} đ</td>
                                                 <td class="text-secondary small">{{ $export->created_at->format('d/m/Y H:i') }}</td>
                                                 <td class="text-center">
                                                     @php
-                                                        $badgeColor = 'bg-primary';
+                                                        $badgeColor = 'bg-dark';
                                                         if($export->status == 'Đã giao hàng') $badgeColor = 'bg-success';
                                                         if($export->status == 'Chờ xác nhận') $badgeColor = 'bg-danger';
                                                     @endphp
@@ -408,18 +464,21 @@
                                                         {{ $export->status }}
                                                     </span>
                                                 </td>
-                                                <td class="text-center">
-                                                    <div class="d-flex justify-content-center gap-1">
+                                                <td class="text-center text-nowrap align-middle" style="width: 1%;">
+                                                    <div class="d-inline-flex align-items-center justify-content-center gap-1.5 flex-nowrap">
+                                                        <!-- Nút Chi tiết -->
+                                                        <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalExportDetail_{{ $export->id }}" title="Xem chi tiết">
+                                                            <i class="bi bi-eye-fill me-1"></i> Chi tiết
+                                                        </button>
+
                                                         <!-- Nút In hóa đơn -->
-                                                        <a href="{{ route('admin.exports.invoice', $export->id) }}" target="_blank" class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold" title="In hóa đơn">
-                                                            <i class="bi bi-printer-fill me-1"></i> In hóa đơn
+                                                        <a href="{{ route('admin.exports.invoice', $export->id) }}" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold" title="In hóa đơn">
+                                                            <i class="bi bi-printer-fill me-1"></i> In
                                                         </a>
-
-
 
                                                         @if($export->status !== 'Hoàn thành' && $export->status !== 'Đã hủy')
                                                         <!-- Nút Hoàn thành -->
-                                                        <form action="{{ route('admin.exports.complete', $export->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn hoàn thành phiếu xuất kho này? Số lượng tồn kho sẽ bị trừ nếu chưa bị trừ.');">
+                                                        <form action="{{ route('admin.exports.complete', $export->id) }}" method="POST" class="m-0 d-inline-flex align-items-center" onsubmit="return confirm('Bạn có chắc chắn muốn hoàn thành phiếu xuất kho này? Số lượng tồn kho sẽ bị trừ nếu chưa bị trừ.');">
                                                             @csrf
                                                             @method('PATCH')
                                                             <button type="submit" class="btn btn-outline-success btn-sm rounded-pill px-3 fw-bold">
@@ -429,7 +488,7 @@
                                                         @endif
                                                         
                                                         <!-- Nút Xóa -->
-                                                        <form action="{{ route('admin.exports.destroy', $export->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa phiếu xuất kho này? Hành động này không thể hoàn tác.');">
+                                                        <form action="{{ route('admin.exports.destroy', $export->id) }}" method="POST" class="m-0 d-inline-flex align-items-center" onsubmit="return confirm('Bạn có chắc chắn muốn xóa phiếu xuất kho này? Hành động này không thể hoàn tác.');">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">
@@ -459,6 +518,7 @@
 @section('modals')
 <!-- Modals for Edit Order (Moved outside table) -->
                     @foreach($pendingOrders ?? [] as $order)
+                    @if(!in_array($order->status, ['paid', 'completed']))
                     <div class="modal fade" id="modalEditOrder_{{ $order->id }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
                         <div class="modal-dialog modal-dialog-centered text-start">
                             <div class="modal-content border-0 shadow-lg rounded-4">
@@ -466,11 +526,11 @@
                                     @csrf
                                     @method('PUT')
                                     <div class="modal-header bg-light border-bottom-0">
-                                        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square text-info me-2"></i>Sửa Thông Tin Giao Hàng</h5>
+                                        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square text-dark me-2"></i>Sửa Thông Tin Giao Hàng</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body p-4 text-start">
-                                        <h6 class="fw-bold text-primary mb-3">Thông Tin Khách Hàng</h6>
+                                        <h6 class="fw-bold text-dark mb-3">Thông Tin Khách Hàng</h6>
                                         <div class="mb-3">
                                             <label class="form-label text-secondary small fw-bold">Tên khách hàng</label>
                                             <input type="text" name="name" class="form-control bg-light" value="{{ $order->name }}" required>
@@ -484,7 +544,7 @@
                                             <textarea name="address" class="form-control bg-light" rows="2" required>{{ $order->address }}</textarea>
                                         </div>
 
-                                        <h6 class="fw-bold text-primary mb-3 mt-4">Sản Phẩm Đơn Hàng</h6>
+                                        <h6 class="fw-bold text-dark mb-3 mt-4">Sản Phẩm Đơn Hàng</h6>
                                         <div class="table-responsive border rounded-3 bg-light">
                                             <table class="table table-sm table-borderless align-middle mb-0">
                                                 <thead class="table-light border-bottom">
@@ -522,12 +582,13 @@
                                     </div>
                                     <div class="modal-footer border-top-0 justify-content-center pb-4">
                                         <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Hủy bỏ</button>
-                                        <button type="submit" class="btn btn-info text-white rounded-pill px-5 fw-bold shadow-sm">Cập nhật đơn hàng</button>
+                                        <button type="submit" class="btn btn-dark text-white rounded-pill px-5 fw-bold shadow-sm">Cập nhật đơn hàng</button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     <!-- Modal Giao nhiệm vụ cho nhân viên -->
                     <div class="modal fade" id="modalAssignDelivery_{{ $order->id }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
@@ -536,13 +597,13 @@
                                 <form action="{{ route('admin.orders.assignDelivery', $order->id) }}" method="POST">
                                     @csrf
                                     <div class="modal-header bg-light border-bottom-0">
-                                        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-truck text-primary me-2"></i>Giao nhiệm vụ lắp đặt/giao hàng</h5>
+                                        <h5 class="modal-title fw-bold text-dark"><i class="bi bi-truck text-dark me-2"></i>Giao nhiệm vụ giao hàng</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body p-4 text-start">
                                         <p class="mb-3">Chọn nhân viên để giao đơn hàng <strong>#{{ $order->id }}</strong> (Khách: {{ $order->name }})</p>
                                         <div class="mb-3">
-                                            <label class="form-label text-secondary fw-bold">Nhân viên Giao hàng/Lắp đặt</label>
+                                            <label class="form-label text-secondary fw-bold">Nhân viên giao hàng</label>
                                             <select name="delivery_staff_id" class="form-select bg-light" required>
                                                 <option value="">-- Chọn nhân viên --</option>
                                                 @foreach($deliveryStaffUsers as $staffUser)
@@ -555,7 +616,7 @@
                                     </div>
                                     <div class="modal-footer border-top-0 justify-content-center pb-4">
                                         <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Hủy bỏ</button>
-                                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">Giao nhiệm vụ</button>
+                                        <button type="submit" class="btn btn-dark rounded-pill px-5 fw-bold shadow-sm">Giao nhiệm vụ</button>
                                     </div>
                                 </form>
                             </div>
@@ -580,7 +641,7 @@
                                                 @csrf
                                                 @method('PATCH')
                                                 <div class="modal-header bg-light border-bottom-0">
-                                                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-clipboard-check text-primary me-2"></i>Xác nhận phiếu nhập</h5>
+                                                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-clipboard-check text-dark me-2"></i>Xác nhận phiếu nhập</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body p-4">
@@ -597,7 +658,7 @@
                                                                     <span class="fw-bold text-dark d-block">{{ $item->product?->name ?? 'SP không rõ' }}</span>
                                                                     <small class="text-muted">Đơn giá: {{ number_format($item->unit_price, 0, ',', '.') }}đ</small>
                                                                 </div>
-                                                                <span class="badge bg-primary rounded-pill px-3">{{ $item->quantity }} chiếc</span>
+                                                                <span class="badge bg-dark rounded-pill px-3">{{ $item->quantity }} chiếc</span>
                                                             </li>
                                                         @endforeach
                                                     </ul>
@@ -625,7 +686,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content bg-white shadow-sm border border-secondary border-opacity-25 text-dark rounded-4">
             <div class="modal-header border-bottom border-secondary border-opacity-20">
-                <h5 class="modal-title fw-bold display-font" id="modalImportTitle"><i class="bi bi-box-arrow-in-down text-primary me-2"></i>Tạo Phiếu Nhập Kho</h5>
+                <h5 class="modal-title fw-bold display-font" id="modalImportTitle"><i class="bi bi-box-arrow-in-down text-dark me-2"></i>Tạo Phiếu Nhập Kho</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formImport" action="{{ route('admin.imports.store') }}" method="POST">
@@ -644,7 +705,7 @@
 
                                 <!-- Thanh lọc và Tìm kiếm SP -->
                                 <div class="mb-4 bg-light p-3 rounded-3 border border-secondary border-opacity-25">
-                                    <div class="mb-2"><small class="text-info fw-bold"><i class="bi bi-funnel"></i> Bộ lọc nhanh sản phẩm</small></div>
+                                    <div class="mb-2"><small class="text-dark fw-bold"><i class="bi bi-funnel"></i> Bộ lọc nhanh sản phẩm</small></div>
                                     <div class="mb-2">
                                         <select id="import_category_filter" class="form-select form-select-sm bg-white text-dark shadow-sm border-secondary border-opacity-25" onchange="filterProducts('import')">
                                             <option value="">Tất cả danh mục</option>
@@ -683,12 +744,12 @@
                                         <select name="product_id[]" class="form-select import_product_select bg-light text-dark border-secondary border-opacity-35 rounded-3" required>
                                             <option value="" data-price="">-- Chọn sản phẩm bên dưới --</option>
                                             @foreach($products ?? [] as $prod)
-                                                <option value="{{ $prod->id }}" data-category="{{ $prod->category_id }}" data-name="{{ strtolower($prod->name) }}" data-price="{{ $prod->price }}">
+                                                <option value="{{ $prod->id }}" data-category="{{ $prod->category_id }}" data-name="{{ $prod->name }}" data-price="{{ $prod->price }}">
                                                     [{{ $prod->category?->name }}] {{ $prod->name }} (Hiện tại: {{ $prod->quantity }})
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <div class="mt-1"><small class="text-primary fw-bold current-selling-price" style="display: none;">Giá bán hiện tại: <span class="price-val">0</span> đ</small></div>
+                                        <div class="mt-1"><small class="text-dark fw-bold current-selling-price" style="display: none;">Giá bán hiện tại: <span class="price-val">0</span> đ</small></div>
                                     </div>
                                     
                                     <!-- Số lượng & Đơn giá Nhập -->
@@ -706,7 +767,7 @@
                             </div>
                             
                             <div class="text-end mt-2" id="add_product_row_container">
-                                <button type="button" class="btn btn-outline-primary rounded-pill fw-bold" id="btn_add_import_product">
+                                <button type="button" class="btn btn-outline-dark rounded-pill fw-bold" id="btn_add_import_product">
                                     <i class="bi bi-plus-circle me-1"></i> Thêm sản phẩm khác
                                 </button>
                             </div>
@@ -715,7 +776,7 @@
                 </div>
                 <div class="modal-footer border-top border-secondary border-opacity-20">
                     <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy bỏ</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-save me-1"></i> Lưu phiếu nhập</button>
+                    <button type="submit" class="btn btn-dark rounded-pill px-4"><i class="bi bi-save me-1"></i> Lưu phiếu nhập</button>
                 </div>
             </form>
         </div>
@@ -727,7 +788,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-white shadow-sm border border-secondary border-opacity-25 text-dark rounded-4">
             <div class="modal-header border-bottom border-secondary border-opacity-20">
-                <h5 class="modal-title fw-bold display-font" id="modalExportTitle"><i class="bi bi-box-arrow-up text-warning me-2"></i>Tạo Phiếu Xuất Kho</h5>
+                <h5 class="modal-title fw-bold display-font" id="modalExportTitle"><i class="bi bi-box-arrow-up text-dark me-2"></i>Tạo Phiếu Xuất Kho</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formExport" action="{{ route('admin.exports.store') }}" method="POST">
@@ -736,7 +797,7 @@
                 <div class="modal-body">
                     <!-- Thanh lọc và Tìm kiếm SP -->
                     <div class="row g-2 mb-3 bg-light p-2 rounded-3 border border-secondary border-opacity-25">
-                        <div class="col-12 mb-1"><small class="text-info fw-bold"><i class="bi bi-funnel"></i> Bộ lọc nhanh sản phẩm</small></div>
+                        <div class="col-12 mb-1"><small class="text-dark fw-bold"><i class="bi bi-funnel"></i> Bộ lọc nhanh sản phẩm</small></div>
                         <div class="col-md-6">
                             <select id="export_category_filter" class="form-select form-select-sm bg-white text-dark shadow-sm border-secondary border-opacity-25" onchange="filterProducts('export')">
                                 <option value="">Tất cả danh mục</option>
@@ -758,7 +819,7 @@
                             @foreach($products ?? [] as $prod)
                                 <option value="{{ $prod->id }}" 
                                         data-category="{{ $prod->category_id }}" 
-                                        data-name="{{ strtolower($prod->name) }}"
+                                        data-name="{{ $prod->name }}"
                                         data-price="{{ $prod->price }}">
                                     [{{ $prod->category?->name }}] {{ $prod->name }} (Giá bán: {{ number_format($prod->price, 0, ',', '.') }} đ | Tồn: {{ $prod->quantity }})
                                 </option>
@@ -770,10 +831,15 @@
                         <label class="form-label text-secondary small fw-bold">Họ và tên khách hàng / Đối tác</label>
                         <input type="text" name="customer_name" id="export_customer" class="form-control bg-light text-dark border-secondary border-opacity-35 rounded-3" placeholder="Nhập tên người nhận hàng..." required>
                     </div>
-                    <!-- Đơn vị vận chuyển -->
+                    <!-- Nhân viên giao hàng -->
                     <div class="mb-3">
-                        <label class="form-label text-secondary small fw-bold">Đơn vị vận chuyển</label>
-                        <input type="text" name="shipping" id="export_shipping" class="form-control bg-light text-dark border-secondary border-opacity-35 rounded-3" placeholder="Nhập hãng vận chuyển (GHN, Viettel Post...)..." required>
+                        <label class="form-label text-secondary small fw-bold">Nhân viên giao hàng phụ trách</label>
+                        <select name="shipping" id="export_shipping" class="form-select bg-light text-dark border-secondary border-opacity-35 rounded-3">
+                            <option value="Chưa phân bổ">-- Chọn nhân viên giao hàng (hoặc để trống) --</option>
+                            @foreach($allDeliveryStaff ?? [] as $staff)
+                                <option value="{{ $staff->name }}{{ $staff->phone ? ' (' . $staff->phone . ')' : '' }}">{{ $staff->name }} - SĐT: {{ $staff->phone ?? 'Chưa có SĐT' }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <!-- Số lượng & Đơn giá xuất -->
                     <div class="row g-3 mb-3">
@@ -798,7 +864,7 @@
                 </div>
                 <div class="modal-footer border-top border-secondary border-opacity-20">
                     <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy bỏ</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-save me-1"></i> Lưu phiếu xuất</button>
+                    <button type="submit" class="btn btn-dark rounded-pill px-4"><i class="bi bi-save me-1"></i> Lưu phiếu xuất</button>
                 </div>
             </form>
         </div>
@@ -810,7 +876,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-white shadow-sm border border-secondary border-opacity-25 text-dark rounded-4">
             <div class="modal-header border-bottom border-secondary border-opacity-20">
-                <h5 class="modal-title fw-bold display-font" id="modalStaffTitle"><i class="bi bi-person-plus text-primary me-2"></i>Thêm Nhân Viên Mới</h5>
+                <h5 class="modal-title fw-bold display-font" id="modalStaffTitle"><i class="bi bi-person-plus text-dark me-2"></i>Thêm Nhân Viên Mới</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formStaff" action="{{ route('admin.staff.store') }}" method="POST" enctype="multipart/form-data">
@@ -845,12 +911,128 @@
                 </div>
                 <div class="modal-footer border-top border-secondary border-opacity-20">
                     <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-save me-1"></i> Lưu thông tin</button>
+                    <button type="submit" class="btn btn-dark rounded-pill px-4"><i class="bi bi-save me-1"></i> Lưu thông tin</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- Modals for Import Details -->
+@foreach($groupedImports ?? [] as $code => $group)
+<div class="modal fade" id="modalImportDetail_{{ $code }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-file-earmark-text text-dark me-2"></i>Chi tiết phiếu nhập: {{ $code }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><span class="text-muted">Nhà cung cấp:</span> <span class="fw-bold">{{ $group->first()->supplier }}</span></p>
+                        <p class="mb-1"><span class="text-muted">Ngày lập:</span> <span class="fw-bold">{{ $group->first()->created_at->format('d/m/Y H:i') }}</span></p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p class="mb-1"><span class="text-muted">Trạng thái:</span> <span class="badge {{ $group->first()->status == 'Đã hoàn thành' ? 'bg-success' : 'bg-light text-dark border text-dark' }}">{{ $group->first()->status }}</span></p>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($group as $item)
+                            <tr>
+                                <td>{{ $item->product->name ?? 'Sản phẩm đã bị xóa' }}</td>
+                                <td class="text-center">{{ $item->quantity }}</td>
+                                <td class="text-end">{{ number_format($item->unit_price, 0, ',', '.') }} đ</td>
+                                <td class="text-end fw-bold text-success">{{ number_format($item->total, 0, ',', '.') }} đ</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="3" class="text-end">Tổng cộng:</th>
+                                <th class="text-end text-danger fs-5">{{ number_format($group->sum('total'), 0, ',', '.') }} đ</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+
+<!-- Modals for Export Details -->
+@foreach($exportsHistory ?? [] as $export)
+<div class="modal fade" id="modalExportDetail_{{ $export->id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-file-earmark-arrow-up text-dark me-2"></i>Chi tiết phiếu xuất: {{ $export->code }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><span class="text-muted">Khách hàng:</span> <span class="fw-bold">{{ $export->customer_name }}</span></p>
+                        <p class="mb-1"><span class="text-muted">Nhân viên giao hàng:</span> <span class="fw-bold">{{ $export->shipping }}</span></p>
+                        <p class="mb-1"><span class="text-muted">Ngày xuất:</span> <span class="fw-bold">{{ $export->created_at->format('d/m/Y H:i') }}</span></p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p class="mb-1"><span class="text-muted">Trạng thái:</span> <span class="badge {{ $export->status == 'Đã giao hàng' ? 'bg-success' : ($export->status == 'Chờ xác nhận' ? 'bg-danger' : 'bg-dark') }}">{{ $export->status }}</span></p>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end">Đơn giá (tạm tính)</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ $export->product->name ?? 'Sản phẩm đã bị xóa' }}</td>
+                                <td class="text-center">{{ $export->quantity }}</td>
+                                <td class="text-end">{{ $export->quantity > 0 ? number_format($export->total / $export->quantity, 0, ',', '.') : 0 }} đ</td>
+                                <td class="text-end fw-bold text-success">{{ number_format($export->total, 0, ',', '.') }} đ</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="3" class="text-end">Tổng cộng:</th>
+                                <th class="text-end text-danger fs-5">{{ number_format($export->total, 0, ',', '.') }} đ</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                @if($export->note)
+                <div class="mt-3 p-3 bg-light rounded">
+                    <strong>Ghi chú:</strong> {{ $export->note }}
+                </div>
+                @endif
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
 
 @endsection
 
@@ -883,18 +1065,19 @@
             }]
         };
 
+        // Tính max động: lấy giá trị lớn nhất trong data, tối thiểu 1 triệu để tránh lỗi số khoa học
+        const rawValues = {!! json_encode($chartValues ?? []) !!};
+        const maxVal = Math.max(...rawValues, 1000000);
+        // Làm tròn lên bội số đẹp (10tr, 50tr, 100tr...)
+        const magnitude = Math.pow(10, Math.floor(Math.log10(maxVal)));
+        const niceMax = Math.ceil(maxVal / magnitude) * magnitude;
+
         new Chart(ctx, {
             type: 'line',
             data: chartData,
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        max: 10000000000,
-                        beginAtZero: true
-                    }
-                },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -907,22 +1090,31 @@
                         displayColors: false,
                         callbacks: {
                             label: function(context) {
-                                return 'Doanh thu: ' + context.parsed.y.toLocaleString('vi-VN') + ' đ';
+                                return 'Doanh thu: ' + Math.round(context.parsed.y).toLocaleString('vi-VN') + ' đ';
                             }
                         }
                     }
                 },
                 scales: {
                     x: {
-                        grid: { color: 'rgba(255,255,255,0.03)' },
+                        grid: { color: 'rgba(150,150,150,0.08)' },
                         ticks: { color: '#8e8e93', font: { family: 'Outfit' } }
                     },
                     y: {
-                        grid: { color: 'rgba(255,255,255,0.03)' },
+                        beginAtZero: true,
+                        max: niceMax,
+                        grid: { color: 'rgba(150,150,150,0.08)' },
                         ticks: {
                             color: '#8e8e93',
                             font: { family: 'Outfit' },
-                            callback: function(value) { return (value / 1000000) + ' Tr'; }
+                            maxTicksLimit: 6,
+                            callback: function(value) {
+                                if (value === 0) return '0';
+                                if (value >= 1000000000) return (value / 1000000000).toFixed(1).replace('.0','') + ' Tỷ';
+                                if (value >= 1000000) return (value / 1000000).toFixed(1).replace('.0','') + ' Tr';
+                                if (value >= 1000) return (value / 1000).toFixed(0) + ' K';
+                                return value.toLocaleString('vi-VN');
+                            }
                         }
                     }
                 }
@@ -1005,7 +1197,7 @@
                 const price = parseFloat(this.getAttribute('data-price')) || 0;
                 const status = this.getAttribute('data-status');
 
-                document.getElementById('modalImportTitle').innerHTML = '<i class="bi bi-pencil-square text-info me-2"></i>Hiệu Chỉnh Phiếu Nhập';
+                document.getElementById('modalImportTitle').innerHTML = '<i class="bi bi-pencil-square text-dark me-2"></i>Hiệu Chỉnh Phiếu Nhập';
                 const form = document.getElementById('formImport');
                 form.action = `/admin/imports/${id}`;
                 document.getElementById('methodImportContainer').innerHTML = '<input type="hidden" name="_method" value="PUT">';
@@ -1032,7 +1224,7 @@
         });
 
         modalImportEl.addEventListener('hidden.bs.modal', function () {
-            document.getElementById('modalImportTitle').innerHTML = '<i class="bi bi-box-arrow-in-down text-primary me-2"></i>Tạo Phiếu Nhập Kho';
+            document.getElementById('modalImportTitle').innerHTML = '<i class="bi bi-box-arrow-in-down text-dark me-2"></i>Tạo Phiếu Nhập Kho';
             const form = document.getElementById('formImport');
             form.action = "{{ route('admin.imports.store') }}";
             document.getElementById('methodImportContainer').innerHTML = '';
@@ -1083,7 +1275,7 @@
                 const price = parseFloat(this.getAttribute('data-price')) || 0;
                 const status = this.getAttribute('data-status');
 
-                document.getElementById('modalExportTitle').innerHTML = '<i class="bi bi-pencil-square text-info me-2"></i>Hiệu Chỉnh Phiếu Xuất';
+                document.getElementById('modalExportTitle').innerHTML = '<i class="bi bi-pencil-square text-dark me-2"></i>Hiệu Chỉnh Phiếu Xuất';
                 const form = document.getElementById('formExport');
                 form.action = `/admin/exports/${id}`;
                 document.getElementById('methodExportContainer').innerHTML = '<input type="hidden" name="_method" value="PUT">';
@@ -1098,7 +1290,7 @@
         });
 
         modalExportEl.addEventListener('hidden.bs.modal', function () {
-            document.getElementById('modalExportTitle').innerHTML = '<i class="bi bi-box-arrow-up text-warning me-2"></i>Tạo Phiếu Xuất Kho';
+            document.getElementById('modalExportTitle').innerHTML = '<i class="bi bi-box-arrow-up text-dark me-2"></i>Tạo Phiếu Xuất Kho';
             const form = document.getElementById('formExport');
             form.action = "{{ route('admin.exports.store') }}";
             document.getElementById('methodExportContainer').innerHTML = '';
@@ -1120,7 +1312,7 @@
                 const address = this.getAttribute('data-address');
                 const avatar = this.getAttribute('data-avatar');
 
-                document.getElementById('modalStaffTitle').innerHTML = '<i class="bi bi-pencil-square text-info me-2"></i>Cập Nhật Nhân Viên';
+                document.getElementById('modalStaffTitle').innerHTML = '<i class="bi bi-pencil-square text-dark me-2"></i>Cập Nhật Nhân Viên';
                 const form = document.getElementById('formStaff');
                 form.action = `/admin/staff/${id}`;
                 document.getElementById('methodStaffContainer').innerHTML = '<input type="hidden" name="_method" value="PUT">';
@@ -1134,7 +1326,7 @@
         });
 
         modalStaffEl.addEventListener('hidden.bs.modal', function () {
-            document.getElementById('modalStaffTitle').innerHTML = '<i class="bi bi-person-plus text-primary me-2"></i>Thêm Nhân Viên Mới';
+            document.getElementById('modalStaffTitle').innerHTML = '<i class="bi bi-person-plus text-dark me-2"></i>Thêm Nhân Viên Mới';
             const form = document.getElementById('formStaff');
             form.action = "{{ route('admin.staff.store') }}";
             document.getElementById('methodStaffContainer').innerHTML = '';
@@ -1161,6 +1353,7 @@
                 
                 let cat = opt.getAttribute('data-category');
                 let name = opt.getAttribute('data-name');
+                if (name) name = name.toLowerCase();
                 
                 let matchCat = (catId === "" || cat === catId);
                 let matchSearch = (search === "" || (name && name.includes(search)));
@@ -1172,3 +1365,4 @@
     }
 </script>
 @endpush
+

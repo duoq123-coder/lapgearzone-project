@@ -13,18 +13,31 @@ use App\Http\Controllers\WishlistController;
 // 1. Trang chủ (Dùng chung logic với trang sản phẩm — DRY)
 Route::get('/', [ProductController::class, 'userIndex'])->name('welcome');
 
+// --- Policy Routes ---
+Route::view('/chinh-sach-bao-hanh', 'policies.warranty')->name('policies.warranty');
+Route::view('/chinh-sach-doi-tra', 'policies.return')->name('policies.return');
+Route::view('/chinh-sach-van-chuyen', 'policies.shipping')->name('policies.shipping');
+Route::view('/bao-mat-thong-tin', 'policies.privacy')->name('policies.privacy');
 
 // 2. Route xác thực dành cho KHÁCH CHƯA ĐĂNG NHẬP (guest)
 Route::middleware('guest')->group(function () {
     Route::get('register', [AuthController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [AuthController::class, 'register']);
+
+    // Xác minh OTP khi đăng ký tài khoản mới
+    Route::get('register/verify-otp', [AuthController::class, 'showVerifyRegisterOtpForm'])->name('register.verify.otp.form');
+    Route::post('register/verify-otp', [AuthController::class, 'verifyRegisterOtp'])->name('register.verify.otp');
+    Route::post('register/resend-otp', [AuthController::class, 'resendRegisterOtp'])->name('register.resend.otp');
+
     Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('login', [AuthController::class, 'login']);
     
-    // Password Reset Routes
+    // Password Reset Routes (Gửi mã OTP về email)
     Route::get('forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
-    Route::post('forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
-    Route::get('reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('forgot-password', [AuthController::class, 'sendResetCodeEmail'])->name('password.email');
+    Route::get('verify-reset-code', [AuthController::class, 'showVerifyResetCodeForm'])->name('password.verify.form');
+    Route::post('verify-reset-code', [AuthController::class, 'verifyResetCode'])->name('password.verify');
+    Route::get('reset-password', [AuthController::class, 'showResetForm'])->name('password.reset');
     Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
@@ -43,10 +56,17 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'admin', 'force_change_password'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [\App\Http\Controllers\AdminController::class, 'profile'])->name('profile');
+    Route::get('/contacts', [\App\Http\Controllers\AdminController::class, 'contacts'])->name('contacts');
+    Route::post('/contacts/{contact}/reply', [\App\Http\Controllers\AdminController::class, 'replyContact'])->name('contacts.reply');
     
-    // Quản lý Settings (QR code)
+    // Quản lý Settings (QR code & Cổng thanh toán PayOS)
     Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+    Route::post('/settings/confirm-payos-webhook', [\App\Http\Controllers\Admin\SettingController::class, 'confirmPayOSWebhook'])->name('settings.confirmPayOSWebhook');
+    
+    // Quản lý Banner Video & Trang chủ
+    Route::get('/banner', [\App\Http\Controllers\Admin\BannerController::class, 'index'])->name('banner.index');
+    Route::post('/banner', [\App\Http\Controllers\Admin\BannerController::class, 'update'])->name('banner.update');
     
     // Quản lý hình ảnh sản phẩm
     Route::delete('products/{product}/image', [ProductController::class, 'destroyImage'])->name('products.image.destroy');
@@ -60,6 +80,12 @@ Route::middleware(['auth', 'admin', 'force_change_password'])->prefix('admin')->
     
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
+    Route::post('tags/quick-store', [\App\Http\Controllers\Admin\TagController::class, 'quickStore'])->name('tags.quickStore');
+    Route::resource('tags', \App\Http\Controllers\Admin\TagController::class)->except(['create', 'show', 'edit']);
+
+    // Quản lý Sự Kiện & Bộ Sưu Tập Động (Dynamic Events)
+    Route::patch('/events/{event}/toggle-active', [\App\Http\Controllers\Admin\EventController::class, 'toggleActive'])->name('events.toggleActive');
+    Route::resource('events', \App\Http\Controllers\Admin\EventController::class);
 
     // Quản lý Nhập / Xuất kho (Dashboard CRUD)
     Route::post('/imports', [\App\Http\Controllers\AdminController::class, 'storeImport'])->name('imports.store');
@@ -104,6 +130,12 @@ Route::middleware(['auth', 'admin', 'force_change_password'])->prefix('admin')->
     
     // Toggle sản phẩm bán chạy lên Banner
     Route::patch('/products/{product}/toggle-featured', [\App\Http\Controllers\AdminController::class, 'toggleFeatured'])->name('products.toggleFeatured');
+
+    // ==========================================
+    // Quản lý Tin tức Công nghệ (News CRUD)
+    // ==========================================
+    Route::resource('news', \App\Http\Controllers\Admin\NewsController::class);
+    Route::patch('/news/{news}/toggle-publish', [\App\Http\Controllers\Admin\NewsController::class, 'togglePublish'])->name('news.togglePublish');
 });
 
 // 5. Route dành cho Nhân viên Giao hàng
@@ -113,38 +145,64 @@ Route::middleware(['auth', 'delivery', 'force_change_password'])->prefix('delive
     Route::post('/{orderId}/issue', [\App\Http\Controllers\DeliveryController::class, 'reportIssue'])->name('reportIssue');
 });
 
-// 6. Route dành cho NGƯỜI DÙNG BÌNH THƯỜNG đã đăng nhập
+// 6. Route xem Sản phẩm & Liên hệ dành cho tất cả mọi người (Khách vãng lai & Thành viên)
+Route::get('/products', [ProductController::class, 'userIndex'])->name('products.index');
+Route::get('/products/{product}', [ProductController::class, 'show_normal'])->name('products.show');
+
+// Route Tin tức & Xu hướng công nghệ (Public)
+Route::get('/tin-tuc', [\App\Http\Controllers\NewsController::class, 'index'])->name('news.index');
+Route::get('/tin-tuc/{slug}', [\App\Http\Controllers\NewsController::class, 'show'])->name('news.show');
+
+// Góp ý của khách hàng
+Route::get('/lien-he', function () {
+    $user = auth()->user();
+    $userContacts = $user ? \App\Models\Contact::where('user_id', $user->id)
+        ->orWhere('email', $user->email)
+        ->when(!empty($user->phone), function ($query) use ($user) {
+            $query->orWhere('phone', $user->phone);
+        })
+        ->latest()
+        ->get() : collect();
+
+    return view('contact', compact('userContacts'));
+})->name('contact.index');
+
+Route::post('/lien-he', function (\Illuminate\Http\Request $request) {
+    $request->validate([
+        'name'    => 'required|string|max:255',
+        'phone'   => ['required', 'string', 'regex:/^(0[3|5|7|8|9])+([0-9]{8})$/'],
+        'email'   => ['required', 'email:rfc,dns', 'max:255'],
+        'message' => 'required|string',
+    ], [
+        'phone.regex' => 'Số điện thoại không hợp lệ. Vui lòng nhập SĐT Việt Nam (VD: 0345678901).',
+        'email.email' => 'Địa chỉ email không hợp lệ.',
+    ]);
+
+    $data = $request->only('name', 'phone', 'email', 'message');
+    if (auth()->check()) {
+        $data['user_id'] = auth()->id();
+    }
+
+    \App\Models\Contact::create($data);
+
+    return back()->with('success', 'Cảm ơn bạn! Góp ý của bạn đã được gửi thành công. Bạn có thể theo dõi phản hồi của Admin ngay bên dưới.');
+})->name('contact.store');
+
+// 7. Route dành cho NGƯỜI DÙNG BÌNH THƯỜNG đã đăng nhập
 Route::middleware(['auth', 'force_change_password'])->group(function () {
-    // Góp ý của khách hàng
-    Route::get('/lien-he', function () {
-        return view('contact');
-    })->name('contact.index');
-    
-    Route::post('/lien-he', function (\Illuminate\Http\Request $request) {
-        $request->validate([
-            'name'    => 'required|string|max:255',
-            'phone'   => ['required', 'string', 'regex:/^(0[3|5|7|8|9])+([0-9]{8})$/'],
-            'email'   => ['required', 'email:rfc,dns', 'max:255'],
-            'message' => 'required|string',
-        ], [
-            'phone.regex' => 'Số điện thoại không hợp lệ. Vui lòng nhập SĐT Việt Nam (VD: 0345678901).',
-            'email.email' => 'Địa chỉ email không hợp lệ.',
-        ]);
-
-        \App\Models\Contact::create($request->only('name', 'phone', 'email', 'message'));
-
-        return back()->with('success', 'Cảm ơn bạn! Góp ý của bạn đã được gửi thành công.');
-    })->name('contact.store');
-
-    // Khu vực xem Sản phẩm của User thường
-    Route::get('/products', [ProductController::class, 'userIndex'])->name('products.index');
-    Route::get('/products/{product}', [ProductController::class, 'show_normal'])->name('products.show');
     
     // Profile Routes
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile/info', [ProfileController::class, 'updateInfo'])->name('profile.updateInfo');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.updateAvatar');
+    Route::post('/profile/banner', [ProfileController::class, 'updateBanner'])->name('profile.updateBanner');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
+    Route::post('/profile/password/send-otp', [ProfileController::class, 'sendPasswordOtp'])->name('profile.password.sendOtp');
+    Route::post('/profile/password/verify-otp', [ProfileController::class, 'verifyPasswordOtp'])->name('profile.password.verifyOtp');
+    Route::post('/profile/password/resend-otp', [ProfileController::class, 'resendPasswordOtp'])->name('profile.password.resendOtp');
+    
+    // Order Tracking for Customer
+    Route::post('/profile/orders/{order}/confirm-received', [ProfileController::class, 'confirmOrderReceived'])->name('profile.confirmOrderReceived');
     
     // Đánh giá sản phẩm
     Route::post('/products/{product}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
@@ -167,3 +225,8 @@ Route::middleware(['auth', 'force_change_password'])->group(function () {
     Route::post('/checkout', [\App\Http\Controllers\CheckoutController::class, 'process'])->name('checkout.process');
     Route::get('/checkout/payment/{order}', [\App\Http\Controllers\CheckoutController::class, 'payment'])->name('checkout.payment');
 });
+
+// PayOS Routes (Public callback, success, cancel & webhook)
+Route::post('/payos/webhook', [\App\Http\Controllers\PayOSController::class, 'webhook'])->name('payos.webhook');
+Route::get('/checkout/payos/success', [\App\Http\Controllers\PayOSController::class, 'success'])->name('checkout.payos.success');
+Route::get('/checkout/payos/cancel', [\App\Http\Controllers\PayOSController::class, 'cancel'])->name('checkout.payos.cancel');

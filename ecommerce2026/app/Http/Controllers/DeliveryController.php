@@ -21,7 +21,7 @@ class DeliveryController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
             
-        $currentTasks = $allOrders->whereIn('delivery_status', ['assigned', 'issue']);
+        $currentTasks = $allOrders->whereIn('delivery_status', ['assigned', 'customer_confirmed', 'issue']);
         $historyTasks = $allOrders->whereIn('delivery_status', ['completed', 'done', 'cancelled']);
 
         return view('delivery.index', compact('user', 'currentTasks', 'historyTasks'));
@@ -85,6 +85,10 @@ class DeliveryController extends Controller
             return redirect()->back()->with('error', 'Bạn không có quyền cập nhật đơn hàng này.');
         }
 
+        if ($order->delivery_status !== 'customer_confirmed') {
+            return redirect()->back()->with('error', 'Khách hàng chưa xác nhận nhận hàng, không thể tải lên minh chứng.');
+        }
+
         $proofPaths = [];
 
         if ($request->hasFile('proof_images')) {
@@ -107,11 +111,49 @@ class DeliveryController extends Controller
         }
         $allProofs = array_merge($existingProofs, $proofPaths);
 
-        $order->update([
+        $updateData = [
             'delivery_proof' => $allProofs,
             'delivery_status' => 'completed',
-        ]);
+        ];
 
-        return redirect()->back()->with('success', 'Đã tải lên minh chứng giao hàng/lắp đặt thành công!');
+        // Nếu là thanh toán online: không giữ tiền mặt
+        if ($order->payment_method !== 'cod_install') {
+            $updateData['cash_remitted'] = true;
+        } else {
+            // Với đơn COD: khi shipper hoàn tất giao hàng và thu tiền
+            if ($order->status !== 'completed') {
+                $updateData['status'] = 'paid';
+            }
+            $updateData['cash_remitted'] = false;
+        }
+
+        // Cập nhật hạng thành viên và tích lũy chi tiêu cho khách
+        if ($order->user_id) {
+            $user = \App\Models\User::find($order->user_id);
+            if ($user && in_array($user->role, ['customer', 'customer_bronze', 'customer_silver', 'customer_gold', 'customer_diamond', 'customer_emerald'])) {
+                $user->increment('total_spent', $order->total_price);
+                
+                $spent = $user->total_spent;
+                $newRole = 'customer_bronze';
+                
+                if ($spent >= 100000000) {
+                    $newRole = 'customer_emerald';
+                } elseif ($spent >= 50000000) {
+                    $newRole = 'customer_diamond';
+                } elseif ($spent >= 20000000) {
+                    $newRole = 'customer_gold';
+                } elseif ($spent >= 5000000) {
+                    $newRole = 'customer_silver';
+                }
+                
+                if ($user->role !== $newRole) {
+                    $user->update(['role' => $newRole]);
+                }
+            }
+        }
+
+        $order->update($updateData);
+
+        return redirect()->back()->with('success', 'Đã tải lên minh chứng giao hàng thành công!');
     }
 }

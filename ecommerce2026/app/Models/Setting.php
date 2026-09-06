@@ -13,4 +13,15 @@ class Setting extends Model
         'key',
         'value',
     ];
+
+    public static function getValue(string $key, $default = null)
+    {
+        $setting = static::where('key', $key)->first();
+        return ($setting && $setting->value !== null && $setting->value !== '') ? $setting->value : $default;
+    }
+
+    public static function setValue(string $key, ?string $value)
+    {
+        return static::updateOrCreate(['key' => $key], ['value' => $value ?? '']);
+    }
 }

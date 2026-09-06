@@ -1,15 +1,60 @@
 @extends('admin.layouts.app')
-@section('title', 'Thêm Sản phẩm')
+@section('title', 'Thêm Sản phẩm - Admin')
+
+@push('styles')
+<style>
+    .btn-tag-inactive {
+        background-color: #ffffff;
+        color: #4b5563;
+        border: 1px solid #d1d5db;
+        transition: all 0.15s ease;
+        font-weight: 500;
+        font-size: 0.82rem;
+        padding: 5px 12px;
+        border-radius: 6px;
+    }
+    .btn-tag-inactive:hover {
+        background-color: #f3f4f6;
+        border-color: #9ca3af;
+        color: #111827;
+    }
+    .btn-tag-active {
+        background-color: #1a1a1e !important;
+        color: #ff9e75 !important;
+        border: 1px solid #CD4C20 !important;
+        box-shadow: 0 2px 6px rgba(205, 76, 32, 0.25);
+        font-weight: 600;
+        font-size: 0.82rem;
+        padding: 5px 12px;
+        border-radius: 6px;
+    }
+    [data-bs-theme="dark"] .btn-tag-inactive {
+        background-color: #232328;
+        color: #9ca3af;
+        border-color: #3f3f46;
+    }
+    [data-bs-theme="dark"] .btn-tag-inactive:hover {
+        background-color: #2e2e34;
+        color: #f3f4f6;
+    }
+    [data-bs-theme="dark"] .btn-tag-active {
+        background-color: #26211f !important;
+        color: #ff7d50 !important;
+        border: 1px solid #ff7d50 !important;
+    }
+</style>
+@endpush
+
 @section('content')
-<div class="card">
-    <div class="card-header">
-        <h2 class="mb-0">Thêm Sản phẩm Mới</h2>
+<div class="card p-4">
+    <div class="card-header bg-transparent border-bottom p-0 pb-3 mb-4" style="border-color: var(--border-color) !important;">
+        <h2 class="serif-title mb-0 text-dark" style="font-size: 1.6rem;"><i class="bi bi-plus-circle me-2" style="color: var(--bellroy-orange);"></i>Thêm Sản phẩm Mới</h2>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         @if ($errors->any())
-            <div class="alert alert-danger mb-4">
+            <div class="alert alert-danger mb-4 rounded-3 p-3" style="background-color: var(--bellroy-orange-subtle); color: var(--bellroy-orange);">
                 <strong class="d-block mb-1">Đã có lỗi xảy ra, vui lòng kiểm tra lại dữ liệu:</strong>
-                <ul class="mb-0 ps-3">
+                <ul class="mb-0 ps-3 small">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
@@ -21,7 +66,7 @@
             @csrf
             <!-- Ảnh sản phẩm -->
             <div class="mb-3">
-                <label for="product_image_input" class="form-label">Ảnh sản phẩm (Sẽ được căn chỉnh 1:1)</label>
+                <label for="product_image_input" class="form-label fw-bold text-dark small">Ảnh sản phẩm chính (Tỉ lệ 1:1)</label>
                 <input type="file" id="product_image_input" class="form-control @error('image') is-invalid @enderror" accept="image/*">
                 <input type="hidden" name="image_base64" id="product_image_base64">
                 @error('image')
@@ -29,14 +74,29 @@
                 @enderror
             </div>
 
+            <!-- Nơi tải lên file 3D -->
+            <div class="mb-3">
+                <label for="model_3d" class="form-label fw-bold text-dark small">Mô hình 3D (.glb)</label>
+                <input type="file" 
+                       id="model_3d" 
+                       name="model_3d" 
+                       class="form-control @error('model_3d') is-invalid @enderror" 
+                       accept=".glb">
+                <small class="text-muted">Chỉ hỗ trợ định dạng .glb (tối đa 50MB)</small>
+                @error('model_3d')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
             <!-- Tên sản phẩm -->
             <div class="mb-3">
-                <label for="name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                <label for="name" class="form-label fw-bold text-dark small">Tên sản phẩm <span class="text-danger">*</span></label>
                 <input type="text"
                        id="name"
                        name="name"
                        class="form-control @error('name') is-invalid @enderror"
                        value="{{ old('name') }}"
+                       placeholder="Ví dụ: Dell XPS 13 Plus 9320..."
                        required>
                 @error('name')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -45,12 +105,12 @@
 
             <!-- Danh mục -->
             <div class="mb-3">
-                <label for="category_id" class="form-label">Danh mục <span class="text-danger">*</span></label>
+                <label for="category_id" class="form-label fw-bold text-dark small">Danh mục <span class="text-danger">*</span></label>
                 <select id="category_id"
                         name="category_id"
-                        class="form-select shadow-sm border-secondary border-opacity-25 @error('category_id') is-invalid @enderror"
+                        class="form-select @error('category_id') is-invalid @enderror"
                         required>
-                    <option value="" class="fw-bold text-primary">-- Chọn danh mục --</option>
+                    <option value="">-- Chọn danh mục --</option>
                     @foreach ($categories as $category)
                         <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>
                             {{ $category->name }}
@@ -64,25 +124,27 @@
 
             <!-- Mô tả -->
             <div class="mb-3">
-                <label for="description" class="form-label">Mô tả</label>
+                <label for="description" class="form-label fw-bold text-dark small">Mô tả sản phẩm</label>
                 <textarea id="description"
                           name="description"
                           class="form-control @error('description') is-invalid @enderror"
-                          rows="3">{{ old('description') }}</textarea>
+                          rows="4"
+                          placeholder="Mô tả cấu hình, tính năng nổi bật...">{{ old('description') }}</textarea>
                 @error('description')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
             <!-- Giá tiền -->
-            <div class="mb-3">
-                <label for="price" class="form-label">Giá tiền <span class="text-danger">*</span></label>
+            <div class="mb-4">
+                <label for="price" class="form-label fw-bold text-dark small">Giá bán niêm yết (VNĐ) <span class="text-danger">*</span></label>
                 <input type="number"
-                       step="0.01"
+                       step="1"
                        id="price"
                        name="price"
                        class="form-control @error('price') is-invalid @enderror"
                        value="{{ old('price') }}"
+                       placeholder="VD: 25000000"
                        required
                        min="0">
                 @error('price')
@@ -90,16 +152,63 @@
                 @enderror
             </div>
 
+            <!-- Tags Thông số & Cấu hình -->
+            <div class="mb-4 p-3 rounded-3 border" style="background-color: var(--surface-muted, #f8f9fa); border-color: var(--border-color) !important;">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                    <label class="form-label fw-bold text-dark small mb-0">
+                        <i class="bi bi-tags-fill me-1" style="color: var(--bellroy-orange);"></i> Tags Thông số & Cấu hình (GPU, CPU, Màn hình...)
+                    </label>
+                    <a href="{{ route('admin.tags.index') }}" target="_blank" class="small text-decoration-none fw-bold" style="color: var(--bellroy-orange);">
+                        <i class="bi bi-gear-fill me-1"></i>Quản lý toàn bộ Tags <i class="bi bi-box-arrow-up-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="form-text text-muted small mb-3">
+                    Chọn các thông số cấu hình áp dụng cho laptop này (VD: <code>RTX 3060</code>, <code>RTX 3070</code>, <code>Core i7</code>, <code>OLED</code>...). Người dùng có thể click lọc theo tag ngay tại trang chủ.
+                </div>
+
+                <!-- Danh sách tags hiện có -->
+                <div id="tag-cloud" class="d-flex flex-wrap gap-2 mb-3">
+                    @php
+                        $selectedTags = old('tags', []);
+                    @endphp
+                    @forelse($tags as $t)
+                        @php $isSelected = in_array($t->id, $selectedTags); @endphp
+                        <label class="tag-chip-label btn btn-sm {{ $isSelected ? 'btn-tag-active' : 'btn-tag-inactive' }}" 
+                               data-tag-id="{{ $t->id }}" 
+                               style="cursor: pointer; user-select: none;">
+                            <input type="checkbox" name="tags[]" value="{{ $t->id }}" class="d-none tag-checkbox" {{ $isSelected ? 'checked' : '' }}>
+                            <i class="bi {{ $isSelected ? 'bi-check-circle-fill text-warning' : 'bi-plus-circle' }} tag-icon me-1"></i>
+                            <span class="tag-name">{{ $t->name }}</span>
+                        </label>
+                    @empty
+                        <span class="text-muted small py-1" id="no-tags-msg">Chưa có tag nào. Hãy nhập tên tag mới ở ô bên dưới để tạo nhanh!</span>
+                    @endforelse
+                </div>
+
+                <!-- Ô tạo nhanh Tag -->
+                <div class="d-flex align-items-center gap-2" style="max-width: 480px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white"><i class="bi bi-plus-lg"></i></span>
+                        <input type="text" id="quick-tag-name" class="form-control" placeholder="Nhập tên tag mới (VD: RTX 3070, i7 13700H)...">
+                        <button type="button" id="btn-quick-add-tag" class="btn btn-dark fw-bold px-3">
+                            <span class="spinner-border spinner-border-sm d-none me-1" id="quick-tag-spinner"></span>
+                            + Thêm Tag Nhanh
+                        </button>
+                    </div>
+                </div>
+                <div id="quick-tag-feedback" class="small mt-1 d-none"></div>
+            </div>
+
             <!-- Ghi chú tồn kho -->
-            <div class="alert alert-info py-2 px-3 small d-flex align-items-center gap-2">
-                <i class="bi bi-info-circle-fill fs-6 text-primary"></i>
-                <span>Sản phẩm sau khi tạo sẽ có số lượng tồn kho mặc định là <strong>0</strong>. Bạn hãy tạo phiếu <strong>Nhập kho</strong> để tăng số lượng.</span>
+            <div class="alert rounded-3 border-0 py-2 px-3 small d-flex align-items-center gap-2 mb-4" style="background-color: var(--bellroy-sage-subtle); color: var(--bellroy-sage);">
+                <i class="bi bi-info-circle-fill fs-6"></i>
+                <span>Sản phẩm sau khi tạo sẽ có số lượng tồn kho mặc định là <strong>0</strong>. Bạn hãy tạo phiếu <strong>Nhập kho</strong> để ghi nhận số lượng thực tế.</span>
             </div>
 
             <!-- Các nút thao tác -->
-            <div class="mt-4">
-                <button type="submit" class="btn btn-success me-2">Lưu lại</button>
-                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Quay lại</a>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-premium px-4">Lưu sản phẩm</button>
+                <a href="{{ route('admin.products.index') }}" class="btn btn-outline-premium">Quay lại</a>
             </div>
         </form>
     </div>
@@ -112,7 +221,9 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        initImageCropper('product_image_input', 'product_image_base64', 1);
+        if(typeof initImageCropper === 'function') {
+            initImageCropper('product_image_input', 'product_image_base64', 1);
+        }
     });
 
     $(document).ready(function() {
@@ -120,6 +231,88 @@
             placeholder: "-- Chọn danh mục --",
             allowClear: true,
             width: '100%'
+        });
+
+        // Toggle tag chip selection
+        $(document).on('click', '.tag-chip-label', function(e) {
+            var checkbox = $(this).find('.tag-checkbox');
+            var isChecked = !checkbox.prop('checked');
+            checkbox.prop('checked', isChecked);
+
+            if (isChecked) {
+                $(this).removeClass('btn-tag-inactive').addClass('btn-tag-active');
+                $(this).find('.tag-icon').removeClass('bi-plus-circle').addClass('bi-check-circle-fill text-warning');
+            } else {
+                $(this).removeClass('btn-tag-active').addClass('btn-tag-inactive');
+                $(this).find('.tag-icon').removeClass('bi-check-circle-fill text-warning').addClass('bi-plus-circle');
+            }
+        });
+
+        // Quick Add Tag AJAX
+        function submitQuickTag() {
+            var tagName = $('#quick-tag-name').val().trim();
+            if (!tagName) return;
+
+            var btn = $('#btn-quick-add-tag');
+            var spinner = $('#quick-tag-spinner');
+            var feedback = $('#quick-tag-feedback');
+
+            btn.prop('disabled', true);
+            spinner.removeClass('d-none');
+            feedback.addClass('d-none').removeClass('text-success text-danger');
+
+            $.ajax({
+                url: '{{ route('admin.tags.quickStore') }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    name: tagName
+                },
+                dataType: 'json',
+                success: function(res) {
+                    btn.prop('disabled', false);
+                    spinner.addClass('d-none');
+                    $('#quick-tag-name').val('');
+
+                    if (res.success && res.tag) {
+                        var tag = res.tag;
+                        var existingLabel = $('.tag-chip-label[data-tag-id="' + tag.id + '"]');
+
+                        if (existingLabel.length > 0) {
+                            existingLabel.find('.tag-checkbox').prop('checked', true);
+                            existingLabel.removeClass('btn-tag-inactive').addClass('btn-tag-active');
+                            existingLabel.find('.tag-icon').removeClass('bi-plus-circle').addClass('bi-check-circle-fill text-warning');
+                            feedback.text('Tag "' + tag.name + '" đã tồn tại và đã được chọn!').addClass('text-success').removeClass('d-none');
+                        } else {
+                            $('#no-tags-msg').remove();
+                            var newChipHtml = '<label class="tag-chip-label btn btn-sm btn-tag-active" data-tag-id="' + tag.id + '" style="cursor: pointer; user-select: none;">' +
+                                '<input type="checkbox" name="tags[]" value="' + tag.id + '" class="d-none tag-checkbox" checked>' +
+                                '<i class="bi bi-check-circle-fill text-warning tag-icon me-1"></i>' +
+                                '<span class="tag-name">' + tag.name + '</span>' +
+                                '</label>';
+                            $('#tag-cloud').append(newChipHtml);
+                            feedback.text('Đã tạo tag "' + tag.name + '" và tự động chọn!').addClass('text-success').removeClass('d-none');
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    btn.prop('disabled', false);
+                    spinner.addClass('d-none');
+                    var errMsg = 'Có lỗi xảy ra khi tạo tag.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errMsg = xhr.responseJSON.message;
+                    }
+                    feedback.text(errMsg).addClass('text-danger').removeClass('d-none');
+                }
+            });
+        }
+
+        $('#btn-quick-add-tag').on('click', submitQuickTag);
+        $('#quick-tag-name').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                submitQuickTag();
+            }
         });
     });
 </script>

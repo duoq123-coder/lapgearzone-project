@@ -19,6 +19,17 @@ class ReviewController extends Controller
             'comment' => 'nullable|string|max:1000',
         ]);
 
+        // Kiểm tra xem người dùng đã mua sản phẩm này chưa
+        $hasPurchased = \App\Models\Order::where('user_id', Auth::id())
+            ->whereIn('status', ['paid', 'completed', 'done'])
+            ->whereHas('items', function($q) use ($product) {
+                $q->where('product_id', $product->id);
+            })->exists();
+
+        if (!$hasPurchased) {
+            return back()->with('error', 'Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và thanh toán.');
+        }
+
         // Kiểm tra xem người dùng đã đánh giá sản phẩm này chưa
         $existingReview = Review::where('user_id', Auth::id())
             ->where('product_id', $product->id)

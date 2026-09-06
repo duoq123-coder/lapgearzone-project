@@ -13,6 +13,19 @@
                 <div class="img-container" style="max-height: 500px; overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #f8f9fa; border-radius: 8px;">
                     <img id="imageToCrop" src="" alt="Picture" style="max-width: 100%; display: block;">
                 </div>
+                <!-- Alignment and Adjustment Toolbar -->
+                <div class="d-flex justify-content-center flex-wrap gap-2 mt-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnZoomIn" title="Phóng to" data-bs-toggle="tooltip"><i class="bi bi-zoom-in"></i></button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnZoomOut" title="Thu nhỏ" data-bs-toggle="tooltip"><i class="bi bi-zoom-out"></i></button>
+                    <div class="vr"></div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnRotateLeft" title="Xoay trái" data-bs-toggle="tooltip"><i class="bi bi-arrow-counterclockwise"></i></button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnRotateRight" title="Xoay phải" data-bs-toggle="tooltip"><i class="bi bi-arrow-clockwise"></i></button>
+                    <div class="vr"></div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnFlipH" title="Lật ngang" data-bs-toggle="tooltip"><i class="bi bi-symmetry-horizontal"></i></button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnFlipV" title="Lật dọc" data-bs-toggle="tooltip"><i class="bi bi-symmetry-vertical"></i></button>
+                    <div class="vr"></div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnReset" title="Đặt lại" data-bs-toggle="tooltip"><i class="bi bi-arrow-repeat"></i></button>
+                </div>
             </div>
             <div class="modal-footer border-top-0 pt-0">
                 <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
@@ -31,6 +44,19 @@
     let currentInputFile;
     let currentHiddenInput;
     let currentAspectRatio = 1;
+    let scaleX = 1;
+    let scaleY = 1;
+    let currentPreviewId = null;
+
+    // Initialize tooltips for the toolbar if bootstrap is loaded
+    document.addEventListener("DOMContentLoaded", function() {
+        if(typeof bootstrap !== 'undefined') {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+    });
 
     // Hàm gọi tiện ích khởi tạo crop cho bất kỳ thẻ input file nào
     // inputId: ID của thẻ input type="file"
@@ -47,15 +73,42 @@
                 currentInputFile = inputElement;
                 currentHiddenInput = document.getElementById(hiddenInputId);
                 currentAspectRatio = aspectRatio;
+                currentPreviewId = previewId;
                 
                 const file = files[0];
+
+                if (file.type.startsWith('video/')) {
+                    if (currentHiddenInput) {
+                        currentHiddenInput.value = '';
+                    }
+                    return; // Không mở modal crop đối với video
+                }
+
+                if (file.type === 'image/gif') {
+                    if (previewId) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const previewEl = document.getElementById(previewId);
+                            if (previewEl) previewEl.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                    if (currentHiddenInput) {
+                        currentHiddenInput.value = '';
+                    }
+                    return; // Không mở modal crop đối với ảnh GIF để giữ animation
+                }
+                
                 const reader = new FileReader();
                 
                 reader.onload = function(event) {
                     const imageToCrop = document.getElementById('imageToCrop');
                     imageToCrop.src = event.target.result;
                     
-                    const cropModal = new bootstrap.Modal(document.getElementById('globalCropModal'));
+                    let cropModal = bootstrap.Modal.getInstance(document.getElementById('globalCropModal'));
+                    if (!cropModal) {
+                        cropModal = new bootstrap.Modal(document.getElementById('globalCropModal'));
+                    }
                     cropModal.show();
                 };
                 
@@ -79,6 +132,8 @@
             cropBoxResizable: true,
             toggleDragModeOnDblclick: false,
         });
+        scaleX = 1;
+        scaleY = 1;
     });
 
     document.getElementById('globalCropModal').addEventListener('hidden.bs.modal', function () {
@@ -98,22 +153,28 @@
         // Lấy chuỗi base64 của ảnh sau khi cắt
         const canvas = cropper.getCroppedCanvas({
             width: 800, // Fixed width max to prevent huge payload
+            fillColor: 'transparent',
             imageSmoothingEnabled: true,
             imageSmoothingQuality: 'high',
         });
         
-        const base64Image = canvas.toDataURL('image/jpeg', 0.85); // Nén jpeg 85%
+        const base64Image = canvas.toDataURL('image/png'); // Dùng PNG để giữ nguyên nền trong suốt
         
         // Lưu vào input hidden
         if(currentHiddenInput) {
             currentHiddenInput.value = base64Image;
         }
         
-        // Hiển thị preview nếu có thiết lập data attribute (tùy chọn)
-        const previewId = currentInputFile.getAttribute('data-preview-id');
-        if(previewId) {
-            const previewEl = document.getElementById(previewId);
+        // Hiển thị preview nếu có thiết lập data attribute (tùy chọn) hoặc từ biến
+        const attrPreviewId = currentInputFile.getAttribute('data-preview-id');
+        const finalPreviewId = currentPreviewId || attrPreviewId;
+        if(finalPreviewId) {
+            const previewEl = document.getElementById(finalPreviewId);
             if(previewEl) previewEl.src = base64Image;
+        }
+
+        if(currentInputFile) {
+            currentInputFile.dispatchEvent(new CustomEvent('cropApply', { detail: { base64: base64Image } }));
         }
         
         // Cập nhật lại UI thông báo đã chọn (vì input file sẽ bị reset)
@@ -121,10 +182,55 @@
         
         // Đóng modal
         const modalEl = document.getElementById('globalCropModal');
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
+        let modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) {
+            modal.hide();
+        } else {
+            // Fallback fallback if getInstance fails
+            modal = new bootstrap.Modal(modalEl);
+            modal.hide();
+        }
         
         // Lưu lại cờ rằng file đã được crop thay vì upload chay
         currentInputFile.value = '';
+    });
+
+    // Toolbar Event Listeners
+    document.getElementById('btnZoomIn').addEventListener('click', function() {
+        if (cropper) cropper.zoom(0.1);
+    });
+    
+    document.getElementById('btnZoomOut').addEventListener('click', function() {
+        if (cropper) cropper.zoom(-0.1);
+    });
+    
+    document.getElementById('btnRotateLeft').addEventListener('click', function() {
+        if (cropper) cropper.rotate(-45);
+    });
+    
+    document.getElementById('btnRotateRight').addEventListener('click', function() {
+        if (cropper) cropper.rotate(45);
+    });
+    
+    document.getElementById('btnFlipH').addEventListener('click', function() {
+        if (cropper) {
+            scaleX = scaleX === 1 ? -1 : 1;
+            cropper.scaleX(scaleX);
+        }
+    });
+    
+    document.getElementById('btnFlipV').addEventListener('click', function() {
+        if (cropper) {
+            scaleY = scaleY === 1 ? -1 : 1;
+            cropper.scaleY(scaleY);
+        }
+    });
+    
+    document.getElementById('btnReset').addEventListener('click', function() {
+        if (cropper) {
+            cropper.reset();
+            scaleX = 1;
+            scaleY = 1;
+        }
     });
 </script>

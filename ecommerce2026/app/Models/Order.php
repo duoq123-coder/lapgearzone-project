@@ -19,9 +19,12 @@ class Order extends Model
         'discount_amount',
         'status',
         'payment_method',
+        'payos_order_code',
+        'payos_payment_link_id',
         'delivery_staff_id',
         'delivery_status',
         'delivery_proof',
+        'customer_issue',
     ];
 
     protected $casts = [

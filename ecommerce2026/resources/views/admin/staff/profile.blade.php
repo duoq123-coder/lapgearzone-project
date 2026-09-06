@@ -16,16 +16,16 @@
             <!-- Profile Card -->
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <!-- Cover Image (Optional decorative) -->
-                <div class="bg-primary bg-opacity-10" style="height: 120px;"></div>
+                <div class="bg-dark bg-opacity-10" style="height: 120px;"></div>
                 
                 <div class="card-body px-5 pb-5 position-relative">
                     <!-- Avatar -->
                     <div class="position-absolute" style="top: -60px; left: 40px;">
-                        @if(!empty($staff->avatar) && str_starts_with($staff->avatar, 'uploads/'))
-                            <img src="{{ asset($staff->avatar) }}" class="rounded-circle border border-4 border-white object-fit-cover shadow-sm" width="120" height="120" alt="Avatar">
+                        @if(!empty($staff->avatar_url))
+                            <img src="{{ $staff->avatar_url }}" class="rounded-circle border border-4 border-white object-fit-cover shadow-sm bg-white" width="120" height="120" alt="Avatar">
                         @else
-                            <div class="rounded-circle border border-4 border-white bg-white d-flex align-items-center justify-content-center shadow-sm" style="width: 120px; height: 120px; font-size: 3rem;">
-                                {{ $staff->avatar ?? '👤' }}
+                            <div class="rounded-circle border border-4 border-white bg-white d-flex align-items-center justify-content-center shadow-sm text-secondary" style="width: 120px; height: 120px; font-size: 3rem;">
+                                <i class="bi bi-person-fill text-muted"></i>
                             </div>
                         @endif
                     </div>
@@ -46,13 +46,13 @@
                     <!-- Profile Info -->
                     <div class="mt-2">
                         <h2 class="fw-bold text-dark mb-1">{{ $staff->name }}</h2>
-                        <p class="text-primary fw-semibold mb-4 fs-5">{{ $staff->role }}</p>
+                        <p class="text-dark fw-semibold mb-4 fs-5">{{ str_ireplace(['nhân viên lắp đặt', 'giao hàng & lắp đặt', 'giao hàng/lắp đặt', 'lắp đặt'], 'Nhân viên giao hàng', $staff->role) }}</p>
 
                         <div class="row g-4 mt-2">
                             <div class="col-md-6">
                                 <div class="d-flex align-items-center p-3 bg-light rounded-3 border border-secondary border-opacity-10">
                                     <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3" style="width: 48px; height: 48px;">
-                                        <i class="bi bi-telephone text-primary fs-5"></i>
+                                        <i class="bi bi-telephone text-dark fs-5"></i>
                                     </div>
                                     <div>
                                         <small class="text-muted d-block fw-bold mb-1">Số điện thoại</small>
@@ -63,7 +63,7 @@
                             <div class="col-md-6">
                                 <div class="d-flex align-items-center p-3 bg-light rounded-3 border border-secondary border-opacity-10">
                                     <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3" style="width: 48px; height: 48px;">
-                                        <i class="bi bi-person-vcard text-info fs-5"></i>
+                                        <i class="bi bi-person-vcard text-dark fs-5"></i>
                                     </div>
                                     <div>
                                         <small class="text-muted d-block fw-bold mb-1">CCCD / CMND</small>
@@ -103,3 +103,4 @@
     </div>
 </div>
 @endsection
+

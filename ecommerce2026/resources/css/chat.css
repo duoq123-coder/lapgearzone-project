@@ -3,39 +3,44 @@
     bottom: 20px;
     right: 20px;
     z-index: 9999;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
 }
 
 #ai-chat-toggle-btn {
-    background-color: #6a11cb;
-    color: white;
+    background-color: #cd4c20;
+    color: #ffffff;
     border: none;
-    padding: 12px 20px;
-    border-radius: 30px;
+    padding: 12px 22px;
+    border-radius: 50rem;
     cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    transition: 0.3s;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    box-shadow: 0 6px 20px rgba(205, 76, 32, 0.35);
+    transition: all 0.25s ease-in-out;
 }
 
 #ai-chat-toggle-btn:hover {
-    background-color: #2575fc;
+    background-color: #b85021;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(205, 76, 32, 0.45);
 }
 
 #ai-chat-box {
-    width: 350px;
-    height: 450px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+    width: 360px;
+    height: 480px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e0d8;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
     display: flex;
     flex-direction: column;
     position: absolute;
-    bottom: 60px;
+    bottom: 64px;
     right: 0;
     overflow: hidden;
-    transition: 0.3s ease-in-out;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 #ai-chat-box.ai-chat-hidden {
@@ -43,72 +48,93 @@
 }
 
 .ai-chat-header {
-    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-    color: white;
-    padding: 12px 15px;
+    background: #1c1a19;
+    color: #ffffff;
+    padding: 14px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-weight: bold;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 #ai-chat-close-btn {
     background: none;
     border: none;
-    color: white;
-    font-size: 22px;
+    color: #a39f99;
+    font-size: 20px;
     cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+#ai-chat-close-btn:hover {
+    color: #ffffff;
 }
 
 #ai-chat-body {
     flex: 1;
-    padding: 15px;
+    padding: 16px;
     overflow-y: auto;
-    background: #f9f9f9;
+    background: #faf9f6;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .ai-message {
-    max-width: 80%;
+    max-width: 82%;
     padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 14px;
-    line-height: 1.4;
+    border-radius: 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
 }
 
 .bot-message {
-    background: #e4e6eb;
-    color: #333;
+    background: #ffffff;
+    color: #232220;
+    border: 1px solid #e8e4dc;
     align-self: flex-start;
+    border-bottom-left-radius: 4px;
 }
 
 .user-message {
-    background: #6a11cb;
-    color: white;
+    background: #cd4c20;
+    color: #ffffff;
     align-self: flex-end;
+    border-bottom-right-radius: 4px;
 }
 
 .ai-chat-footer {
-    padding: 10px;
-    background: #fff;
+    padding: 12px;
+    background: #ffffff;
     display: flex;
-    border-top: 1px solid #ddd;
+    align-items: center;
+    border-top: 1px solid #ece7df;
 }
 
 #ai-user-input {
     flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
+    padding: 9px 14px;
+    border: 1px solid #e0dbd1;
+    border-radius: 50rem;
     outline: none;
-    font-size: 14px;
+    font-size: 13.5px;
+    color: #232220;
+    background-color: #faf9f6;
+    transition: border-color 0.2s ease;
+}
+
+#ai-user-input:focus {
+    border-color: #cd4c20;
+    background-color: #ffffff;
 }
 
 #ai-send-btn {
-    background: #6a11cb;
-    color: white;
+    background: #cd4c20;
+    color: #ffffff;
     border: none;
     width: 38px;
     height: 38px;
@@ -118,8 +144,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
 #ai-send-btn:hover {
-    background: #2575fc;
+    background: #b85021;
+    transform: scale(1.05);
 }

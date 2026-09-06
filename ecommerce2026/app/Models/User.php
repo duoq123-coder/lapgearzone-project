@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'phone', 'address', 'avatar', 'cccd', 'must_change_password', 'total_spent'])]
+#[Fillable(['name', 'email', 'password', 'role', 'phone', 'address', 'avatar', 'banner', 'cccd', 'must_change_password', 'total_spent', 'reset_code'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -75,5 +75,33 @@ class User extends Authenticatable
         }
 
         return asset('storage/' . $this->avatar);
+    }
+
+    public function getBannerUrlAttribute()
+    {
+        if (!$this->banner) {
+            if (file_exists(public_path('images/banner2.mp4'))) {
+                return asset('images/banner2.mp4');
+            }
+            return asset('images/banner1.jpg');
+        }
+        
+        if (str_starts_with($this->banner, 'http://') || str_starts_with($this->banner, 'https://')) {
+            return $this->banner;
+        }
+
+        if (str_starts_with($this->banner, 'uploads/')) {
+            return asset($this->banner);
+        }
+
+        return asset('storage/' . $this->banner);
+    }
+
+    public function getIsBannerVideoAttribute(): bool
+    {
+        $url = $this->banner_url ?? '';
+        $path = parse_url($url, PHP_URL_PATH);
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        return in_array($ext, ['mp4', 'webm', 'ogg']);
     }
 }

@@ -10,11 +10,11 @@ class Product extends Model
     use HasFactory;
 
     // Khai báo các cột được phép thêm dữ liệu (Mass Assignment)
-    // Đã loại bỏ 'quantity' để bảo vệ dữ liệu tồn kho, chỉ cập nhật qua Nhập/Xuất kho
     protected $fillable = [
         'name',
         'description',
         'image',
+        'model_3d', // Thêm dòng này để cho phép lưu file 3D
         'price',
         'category_id',
         'is_featured',
@@ -61,5 +61,17 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    // Quan hệ với Tag (Nhiều - Nhiều)
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'product_tag');
+    }
+
+    // Quan hệ với Event (Nhiều - Nhiều)
+    public function events()
+    {
+        return $this->belongsToMany(Event::class, 'event_product')->withPivot('sort_order');
     }
 }

@@ -23,12 +23,14 @@ public function boot(): void
 
     // View Composer cho khu vực Admin
     \Illuminate\Support\Facades\View::composer('admin.layouts.app', function ($view) {
-        $outOfStockProducts = \App\Models\Product::where('quantity', '<=', 0)->get();
+        $outOfStockProducts = \App\Models\Product::where('quantity', '<', 10)->get();
+        $deliveryIssues = \App\Models\Order::where('delivery_status', 'issue')->get();
         // Bạn có thể thêm các loại thông báo khác tại đây (VD: đơn hàng chờ xử lý)
         // $pendingOrders = \App\Models\Order::where('status', 'pending')->get();
         
         $view->with('shopIssues', [
             'out_of_stock' => $outOfStockProducts,
+            'delivery_issues' => $deliveryIssues,
             // 'pending_orders' => $pendingOrders,
         ]);
     });

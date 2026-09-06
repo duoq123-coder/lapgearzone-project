@@ -1,29 +1,90 @@
 @extends('admin.layouts.app')
-@section('title', 'Danh sách Sản phẩm')
+@section('title', 'Danh sách Sản phẩm - Admin')
+
+@push('styles')
+<style>
+    [data-bs-theme="light"] .admin-products-table tbody td {
+        background-color: #ffffff !important;
+        color: #44403c !important;
+    }
+
+    [data-bs-theme="light"] .admin-products-table tbody .text-muted {
+        color: #6e6b66 !important;
+    }
+
+    [data-bs-theme="light"] .admin-products-table tbody .text-dark,
+    [data-bs-theme="light"] .admin-products-table tbody strong {
+        color: #232220 !important;
+    }
+
+    [data-bs-theme="light"] .admin-products-table .badge-terracotta {
+        background-color: #fbeee8 !important;
+        color: #a43d1a !important;
+        border: 1px solid #efc9b9;
+    }
+
+    [data-bs-theme="light"] .admin-products-table .badge-sage {
+        background-color: #edf5f1 !important;
+        color: #356b59 !important;
+        border: 1px solid #bdd9ce;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0 fw-bold text-dark display-font"><i class="bi bi-box-seam me-2 text-primary"></i>Danh sách Sản phẩm</h2>
-    <a href="{{ route('admin.products.create') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
-        <i class="bi bi-plus-circle-fill me-1"></i> Thêm Sản phẩm
-    </a>
+    <div>
+        <h2 class="mb-0 fw-bold text-dark display-font"><i class="bi bi-box-seam me-2" style="color: var(--bellroy-orange);"></i>Danh sách Sản phẩm</h2>
+        <p class="text-secondary small mb-0">Quản lý kho hàng và danh mục thiết bị công nghệ</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ route('admin.tags.index') }}" class="btn btn-outline-premium px-3">
+            <i class="bi bi-tags-fill me-1"></i> Quản lý Tags
+        </a>
+        <a href="{{ route('admin.products.create') }}" class="btn btn-premium px-4">
+            <i class="bi bi-plus-circle-fill me-1"></i> Thêm Sản phẩm
+        </a>
+    </div>
 </div>
 
 <!-- ================= PHẦN TÌM KIẾM SẢN PHẨM ================= -->
 <div class="mb-4">
-    <form action="{{ route('admin.products.index') }}" method="GET" class="d-flex align-items-center">
-        <div class="input-group shadow-sm" style="max-width: 500px;">
-            <span class="input-group-text bg-white text-secondary border-end-0"><i class="bi bi-search"></i></span>
+    <form action="{{ route('admin.products.index') }}" method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="input-group" style="max-width: 780px;">
+            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
             <input type="text" 
                    name="search" 
                    class="form-control border-start-0" 
-                   placeholder="Nhập tên sản phẩm cần tìm..." 
+                   placeholder="Tìm kiếm theo tên sản phẩm..." 
                    value="{{ request('search') }}">
-            <button type="submit" class="btn btn-primary fw-bold px-4">Tìm kiếm</button>
+            
+            <select name="category" class="form-select border-start-0 bg-white" style="max-width: 200px;">
+                <option value="">- Tất cả danh mục -</option>
+                @if(isset($categories))
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+
+            <select name="tag" class="form-select border-start-0 bg-white" style="max-width: 170px;">
+                <option value="">- Tất cả Tags -</option>
+                @if(isset($tags))
+                    @foreach($tags as $t)
+                        <option value="{{ $t->slug }}" {{ request('tag') == $t->slug ? 'selected' : '' }}>
+                            {{ $t->name }}
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+
+            <button type="submit" class="btn btn-dark px-4 fw-bold">Lọc</button>
         </div>
         
-        <!-- Nút hủy lọc chỉ hiện khi có từ khóa tìm kiếm -->
-        @if(request('search'))
-            <a href="{{ route('admin.products.index') }}" class="btn btn-outline-danger ms-3 shadow-sm fw-bold">
+        @if(request('search') || request('category') || request('tag'))
+            <a href="{{ route('admin.products.index') }}" class="btn btn-outline-premium">
                 <i class="bi bi-x-circle me-1"></i>Hủy lọc
             </a>
         @endif
@@ -31,94 +92,97 @@
 </div>
 <!-- ========================================================= -->
 
-{{-- Hiển thị thông báo thành công sau khi Thêm / Sửa / Xóa --}}
-@if (session('success'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    {{ session('success') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-@endif
 
-<div class="table-responsive">
-    <table class="table table-bordered table-striped align-middle shadow-sm">
-        <thead class="table-light">
-            <tr>
-                <th style="width: 60px;" class="text-center">STT</th>
-                <th style="width:120px;" class="text-center">Ảnh</th>
-                <th>Tên Sản phẩm</th>
-                <th>Danh mục</th>
-                <th>Mô tả</th>
-                <th style="width: 100px;" class="text-center">Số lượng</th>
-                <th style="width: 130px;">Giá/SP</th>
-                <th style="width: 180px;" class="text-center">Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($products as $product)
-            <tr>
-                <!-- STT bắt đầu từ 1 và tiếp nối theo phân trang -->
-                <td class="text-center fw-bold text-secondary">
-                    {{ $products->firstItem() ? $products->firstItem() + $loop->index : $loop->iteration }}
-                </td>
-                <td class="align-middle text-center">
-                    @if($product->image)
-                        <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" style="height:60px; width:60px; object-fit:cover; border-radius:6px;" class="shadow-sm">
-                    @else
-                        <div class="bg-light d-inline-flex align-items-center justify-content-center shadow-sm" style="height:60px; width:60px; border-radius:6px;">
-                            <i class="bi bi-image text-muted"></i>
+
+<div class="card overflow-hidden">
+    <div class="table-responsive">
+        <table class="table admin-products-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width: 50px;">#</th>
+                    <th class="text-center" style="width: 70px;">Ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Mô tả ngắn</th>
+                    <th class="text-center">Kho</th>
+                    <th>Giá bán</th>
+                    <th class="text-center" style="width: 170px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($products as $product)
+                <tr>
+                    <td class="text-center text-muted fw-bold font-monospace">
+                        {{ $products->firstItem() ? $products->firstItem() + $loop->index : $loop->iteration }}
+                    </td>
+                    <td class="align-middle text-center">
+                        @if($product->image)
+                            <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" style="height: 52px; width: 52px; object-fit: contain; background: var(--surface-muted); border-radius: 2px;" class="border p-1">
+                        @else
+                            <div class="d-inline-flex align-items-center justify-content-center border" style="height: 52px; width: 52px; border-radius: 2px; background: var(--surface-muted);">
+                                <i class="bi bi-laptop text-muted"></i>
+                            </div>
+                        @endif
+                    </td>
+                    <td>
+                        <strong class="text-dark d-block">{{ $product->name }}</strong>
+                        <div class="d-flex flex-wrap align-items-center gap-1 mt-1">
+                            @if($product->tags && $product->tags->count() > 0)
+                                @foreach($product->tags as $t)
+                                    <a href="{{ route('admin.products.index', ['tag' => $t->slug]) }}" 
+                                       class="badge text-decoration-none" 
+                                       style="background: rgba(205, 76, 32, 0.1); color: #CD4C20; border: 1px solid rgba(205, 76, 32, 0.25); font-size: 10px; font-weight: 600;"
+                                       title="Lọc sản phẩm theo tag {{ $t->name }}">
+                                        #{{ $t->name }}
+                                    </a>
+                                @endforeach
+                            @endif
                         </div>
-                    @endif
-                </td>
-                <td><strong>{{ $product->name }}</strong></td>
-                <td>
-                    <span class="badge bg-info text-dark">
-                        {{ $product->category->name ?? 'Chưa phân loại' }}
-                    </span>
-                </td>
-                {{-- Cắt ngắn mô tả nếu quá dài --}}
-                <td>{{ Str::limit($product->description, 50, '...') }}</td>
-                <td class="text-center fw-bold {{ $product->quantity > 0 ? 'text-success' : 'text-danger' }}">
-                    {{ $product->quantity }}
-                </td>
-                {{-- Format giá tiền theo chuẩn VNĐ --}}
-                <td class="text-danger fw-bold">{{ number_format($product->price, 0, ',', '.') }} đ</td>
-                <td class="text-center">
-                    <div class="d-flex justify-content-center gap-1">
-                        {{-- Nút Xem --}}
-                        <a href="{{ route('admin.products.show', $product) }}" class="btn btn-info btn-sm text-dark" title="Xem chi tiết">Xem</a>
-                        {{-- Nút Quản lý ảnh --}}
-                        <a href="{{ route('admin.products.images.edit', $product) }}" class="btn btn-secondary btn-sm" title="Quản lý ảnh chi tiết">
-                            <i class="bi bi-images"></i>
-                        </a>
-                        {{-- Nút Sửa --}}
-                        <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-warning btn-sm">Sửa</a>
-                        {{-- Form Xóa --}}
-                        <form action="{{ route('admin.products.destroy', $product) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="8" class="text-center text-muted py-5">
-                    <i class="bi bi-box-seam fs-1 d-block mb-3 opacity-50"></i>
-                    @if(request('search'))
-                        Không tìm thấy sản phẩm nào khớp với từ khóa "<strong>{{ request('search') }}</strong>".
-                    @else
-                        Chưa có sản phẩm nào trong hệ thống.
-                    @endif
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+                    </td>
+                    <td>
+                        <span class="badge badge-terracotta">
+                            {{ $product->category->name ?? 'Chưa phân loại' }}
+                        </span>
+                    </td>
+                    <td class="text-muted small">{{ Str::limit($product->description, 50, '...') }}</td>
+                    <td class="text-center fw-bold">
+                        @if($product->quantity > 0)
+                            <span class="badge badge-sage font-monospace">{{ $product->quantity }}</span>
+                        @else
+                            <span class="badge bg-danger bg-opacity-10 text-danger">Hết</span>
+                        @endif
+                    </td>
+                    <td class="fw-bold font-monospace text-dark text-nowrap">{{ number_format($product->price, 0, ',', '.') }} đ</td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center align-items-center gap-1 flex-wrap">
+                            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-outline-premium btn-sm">Sửa</a>
+                            <form action="{{ route('admin.products.destroy', $product) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-link text-danger text-decoration-none fw-bold">Xóa</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-5">
+                        <i class="bi bi-box-seam fs-1 d-block mb-3 opacity-50"></i>
+                        @if(request('search'))
+                            Không tìm thấy sản phẩm nào khớp với từ khóa "<strong>{{ request('search') }}</strong>".
+                        @else
+                            Chưa có sản phẩm nào trong hệ thống.
+                        @endif
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Phân trang -->
-<div class="d-flex justify-content-center mt-3">
+<div class="d-flex justify-content-center mt-4">
     {{ $products->links() }}
 </div>
 @endsection

@@ -24,4 +24,25 @@ class Staff extends Model
     {
         return $this->hasMany(Attendance::class);
     }
+
+    public function getAvatarUrlAttribute()
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://')) {
+            return $this->avatar;
+        }
+
+        if (str_starts_with($this->avatar, 'uploads/')) {
+            return asset($this->avatar);
+        }
+
+        if (str_starts_with($this->avatar, 'storage/')) {
+            return asset($this->avatar);
+        }
+
+        return asset('storage/' . ltrim($this->avatar, '/'));
+    }
 }

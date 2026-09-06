@@ -19,8 +19,8 @@ class CategoryController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        // Đổi 'desc' thành 'asc' để ID sắp xếp từ Min -> Max (1, 2, 3...)
-        $categories = $query->orderBy('id', 'asc')->paginate(10)->withQueryString(); 
+        // Sắp xếp danh mục theo thứ tự bảng chữ cái (tên danh mục)
+        $categories = $query->orderBy('name', 'asc')->paginate(10)->withQueryString(); 
 
         return view('admin.categories.index', compact('categories')); 
     } 

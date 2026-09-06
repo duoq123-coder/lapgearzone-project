@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         // Chạy AdminUserSeeder
         $this->call(AdminUserSeeder::class);
+        $this->call(NewsSeeder::class);
 
         // Tạo tài khoản test customer
         User::updateOrCreate(

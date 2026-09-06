@@ -38,7 +38,7 @@ class CheckoutController extends Controller
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'address' => 'required|string',
-            'payment_method' => 'required|in:vnpay,cod_install',
+            'payment_method' => 'required|in:payos,vnpay,cod_install',
         ]);
 
         $cartItems = Cart::where('user_id', Auth::id())->with('product')->get();
@@ -54,6 +54,9 @@ class CheckoutController extends Controller
         $couponCode = Session::get('coupon_code');
         $finalTotal = max(0, $total - $discountAmount);
 
+        $paymentMethod = $request->payment_method === 'vnpay' ? 'payos' : $request->payment_method;
+        $initialStatus = ($paymentMethod === 'cod_install') ? 'processing' : 'pending';
+
         // Tạo đơn hàng
         $order = Order::create([
             'user_id' => Auth::id(),
@@ -63,8 +66,8 @@ class CheckoutController extends Controller
             'total_price' => $finalTotal,
             'coupon_code' => $couponCode,
             'discount_amount' => $discountAmount,
-            'status' => 'pending',
-            'payment_method' => $request->payment_method,
+            'status' => $initialStatus,
+            'payment_method' => $paymentMethod,
         ]);
 
         // Tạo order items
@@ -91,7 +94,20 @@ class CheckoutController extends Controller
         if ($request->payment_method === 'cod_install') {
             // Đặt mặc định cash_remitted = false cho đơn COD (nhân viên chưa nộp tiền về công ty)
             $order->update(['cash_remitted' => false]);
-            return redirect()->route('welcome')->with('success', 'Đặt hàng thành công! Nhân viên sẽ liên hệ để giao hàng và lắp đặt tận nơi.');
+            return redirect()->route('welcome')->with('success', 'Đặt hàng thành công! Nhân viên sẽ liên hệ để giao hàng tận nơi.');
+        }
+
+        // Phương thức thanh toán tự động PayOS
+        $payOSService = app(\App\Services\PayOSService::class);
+        if ($payOSService->isConfigured()) {
+            try {
+                $paymentLink = $payOSService->createPaymentLink($order);
+                if (!empty($paymentLink->checkoutUrl)) {
+                    return redirect($paymentLink->checkoutUrl);
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('PayOS redirect error: ' . $e->getMessage());
+            }
         }
 
         return redirect()->route('checkout.payment', $order->id);
@@ -103,8 +119,33 @@ class CheckoutController extends Controller
             abort(403);
         }
 
-        $qrCode = Setting::where('key', 'payment_qr_code')->first();
+        if ($order->status === 'paid') {
+            return redirect()->route('checkout.payos.success', ['order_id' => $order->id]);
+        }
 
-        return view('checkout.payment', compact('order', 'qrCode'));
+        $qrCode = Setting::where('key', 'payment_qr_code')->first();
+        $payOSService = app(\App\Services\PayOSService::class);
+        $payOSConfigured = $payOSService->isConfigured();
+
+        // Thử lấy link PayOS nếu chưa có
+        $payOSCheckoutUrl = null;
+        if ($payOSConfigured) {
+            try {
+                if (!$order->payos_order_code) {
+                    $link = $payOSService->createPaymentLink($order);
+                    $payOSCheckoutUrl = $link->checkoutUrl ?? null;
+                } else {
+                    $info = $payOSService->getPaymentLinkInformation($order->payos_order_code);
+                    if ($info && isset($info->status) && $info->status === 'PAID') {
+                        $order->update(['status' => 'paid']);
+                        return redirect()->route('checkout.payos.success', ['order_id' => $order->id]);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Tiếp tục hiển thị trang thanh toán PayOS
+            }
+        }
+
+        return view('checkout.payment', compact('order', 'qrCode', 'payOSConfigured', 'payOSCheckoutUrl'));
     }
 }

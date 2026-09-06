@@ -40,7 +40,7 @@ class CartController extends Controller
         }
 
         // Tự động tìm voucher tốt nhất nếu chưa áp dụng hoặc voucher hiện tại không hợp lệ
-        if (!$couponCode || !$coupon || $total < $coupon->min_order_value) {
+        if (!Session::get('coupon_removed') && (!$couponCode || !$coupon || $total < $coupon->min_order_value)) {
             $userRole = Auth::user()->role;
             $roleWeights = [
                 'customer' => 0,
@@ -61,6 +61,12 @@ class CartController extends Controller
                     $query->whereNull('usage_limit')
                           ->orWhereColumn('used', '<', 'usage_limit');
                 })
+                ->where(function($q) {
+                    $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+                })
+                ->where(function($q) {
+                    $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+                })
                 ->get()
                 ->filter(function($c) use ($userWeight, $roleWeights) {
                     if (empty($c->required_tier)) return true;
@@ -74,7 +80,15 @@ class CartController extends Controller
                 $maxDiscount = 0;
 
                 foreach ($autoCoupons as $c) {
-                    $disc = ($c->type === 'fixed') ? min($total, $c->value) : ($total * $c->value) / 100;
+                    if ($c->type === 'fixed') {
+                        $disc = min($total, $c->value);
+                    } else {
+                        $disc = ($total * $c->value) / 100;
+                        if ($c->max_discount_amount && $c->max_discount_amount > 0) {
+                            $disc = min($disc, $c->max_discount_amount);
+                        }
+                    }
+
                     if ($disc > $maxDiscount) {
                         $maxDiscount = $disc;
                         $bestCoupon = $c;
@@ -89,11 +103,14 @@ class CartController extends Controller
             }
         }
 
-        if ($coupon && $total >= $coupon->min_order_value) {
+        if ($coupon && $total >= $coupon->min_order_value && $coupon->isValidNow()) {
             if ($coupon->type === 'fixed') {
                 $discountAmount = min($total, $coupon->value); // Không giảm quá tổng tiền
             } else {
                 $discountAmount = ($total * $coupon->value) / 100;
+                if ($coupon->max_discount_amount && $coupon->max_discount_amount > 0) {
+                    $discountAmount = min($discountAmount, $coupon->max_discount_amount);
+                }
             }
         } else {
             // Xóa coupon nếu không còn đủ điều kiện và không có auto coupon thay thế
@@ -101,10 +118,41 @@ class CartController extends Controller
             $couponCode = null;
         }
 
+        // Lấy danh sách tất cả các voucher khả dụng cho user (để hiển thị nút chọn)
+        $userRole = Auth::user()->role;
+        $roleWeights = [
+            'customer' => 0,
+            'customer_bronze' => 1,
+            'customer_silver' => 2,
+            'customer_gold' => 3,
+            'customer_diamond' => 4,
+            'customer_emerald' => 5,
+        ];
+        $userWeight = $roleWeights[$userRole] ?? 0;
+
+        $availableCoupons = Coupon::where('is_active', true)
+            ->where(function($query) {
+                $query->whereNull('usage_limit')
+                      ->orWhereColumn('used', '<', 'usage_limit');
+            })
+            ->where(function($q) {
+                $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+            })
+            ->where(function($q) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+            })
+            ->orderBy('min_order_value', 'asc')
+            ->get()
+            ->filter(function($c) use ($userWeight, $roleWeights) {
+                if (empty($c->required_tier)) return true;
+                $reqWeight = $roleWeights[$c->required_tier] ?? 99;
+                return $userWeight >= $reqWeight;
+            })->values();
+
         Session::put('discount_amount', $discountAmount);
         $finalTotal = max(0, $total - $discountAmount);
 
-        return view('cart.index', compact('cartItems', 'total', 'cartCount', 'discountAmount', 'finalTotal', 'couponCode'));
+        return view('cart.index', compact('cartItems', 'total', 'cartCount', 'discountAmount', 'finalTotal', 'couponCode', 'availableCoupons'));
     }
 
     /**
@@ -205,7 +253,15 @@ class CartController extends Controller
         }
 
         if (!$coupon->is_active) {
-            return back()->with('error', 'Mã giảm giá đã hết hạn hoặc không khả dụng.');
+            return back()->with('error', 'Mã giảm giá đã tạm thời bị khóa.');
+        }
+
+        if ($coupon->starts_at && $coupon->starts_at->isFuture()) {
+            return back()->with('error', 'Mã giảm giá chưa đến thời gian áp dụng (bắt đầu lúc ' . $coupon->starts_at->format('H:i d/m/Y') . ').');
+        }
+
+        if ($coupon->ends_at && $coupon->ends_at->isPast()) {
+            return back()->with('error', 'Mã giảm giá đã hết hạn sử dụng (hết hạn lúc ' . $coupon->ends_at->format('H:i d/m/Y') . ').');
         }
 
         if ($coupon->usage_limit !== null && $coupon->used >= $coupon->usage_limit) {
@@ -246,6 +302,7 @@ class CartController extends Controller
 
         // Lưu vào Session
         Session::put('coupon_code', $code);
+        Session::forget('coupon_removed');
 
         return back()->with('success', 'Đã áp dụng mã giảm giá thành công!');
     }
@@ -256,6 +313,7 @@ class CartController extends Controller
     public function removeCoupon()
     {
         Session::forget(['coupon_code', 'discount_amount']);
+        Session::put('coupon_removed', true);
         return back()->with('success', 'Đã bỏ mã giảm giá.');
     }
 
